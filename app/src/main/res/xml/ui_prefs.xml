@@ -8,10 +8,20 @@
             android:summaryOff="Disabled"
             android:summaryOn="Enabled"
             android:title="Test Switch"/>
+        <com.wubydax.romcontrol.prefs.MyCheckBoxPreference
+            android:title="Test Checkbox"
+            android:summaryOff="Disabled"
+            android:summaryOn="Enabled"
+            android:key="test_checkbox"/>
         <com.wubydax.romcontrol.prefs.ColorPickerPreference
             android:defaultValue="#ffccdd"
             android:key="test_color"
             android:title="Test color"/>
+        <com.wubydax.romcontrol.prefs.IntentDialogPreference
+            android:title="Select Test App"
+            app:showSearch="true"
+            app:intentSeparator="/"
+            android:key="test_intent"/>
     </PreferenceCategory>
     <PreferenceCategory
         android:title="Useful Apps">

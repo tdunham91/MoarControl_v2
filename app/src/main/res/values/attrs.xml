@@ -12,4 +12,8 @@
     <declare-styleable name="RunScriptPreference">
         <attr name="scriptFileName" format="string"/>
     </declare-styleable>
+    <declare-styleable name="IntentDialogPreference">
+        <attr name="intentSeparator" format="string"/>
+        <attr name="showSearch" format="boolean"/>
+    </declare-styleable>
 </resources>

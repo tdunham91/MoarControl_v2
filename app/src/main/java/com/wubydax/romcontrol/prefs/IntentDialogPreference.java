@@ -1,10 +1,10 @@
 package com.wubydax.romcontrol.prefs;
 
 import android.app.AlertDialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
@@ -14,6 +14,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.DialogPreference;
 import android.preference.Preference;
+import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
@@ -34,6 +35,7 @@ import android.widget.SectionIndexer;
 import android.widget.TextView;
 
 import com.wubydax.romcontrol.R;
+import com.wubydax.romcontrol.utils.Constants;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -55,28 +57,28 @@ import java.util.Set;
 
         You should have received a copy of the GNU General Public License
         along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
+@SuppressWarnings({"deprecation", "unused"})
 public class IntentDialogPreference extends DialogPreference implements AdapterView.OnItemClickListener {
-    String mValue, mSummary;
-    Drawable appIcon;
-    String separator;
-    boolean isSearch;
-    Context c;
-    PackageManager pm;
-    ApplicationInfo ai;
-    ListView lv;
-    ImageView prefAppIcon;
-    EditText search;
-    ProgressBar pb;
-    AppListAdapter appListAdapter;
-    List<ApplicationInfo> mAppList;
-    AsyncTask<Void, Void, Void> loadApps;
+    boolean mIsSearch;
+    private String mSummary;
+    private Context mContext;
+    private ListView mListView;
+    private ProgressBar mProgressBar;
+    private AppListAdapter mAppListAdapter;
+    private AsyncTask<Void, Void, Void> mAsyncTask;
+    private String mSeparator;
+    private PackageManager mPackageManager;
 
     public IntentDialogPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
-        this.c = context;
-        pm = c.getPackageManager();
-        separator = getStringForAttr(attrs, null, "setSeparatorString", "/");
-        isSearch = attrs.getAttributeBooleanValue(null, "includeSearch", false);
+        this.mContext = context;
+        mPackageManager = context.getPackageManager();
+        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.IntentDialogPreference);
+        mSeparator = typedArray.getString(R.styleable.IntentDialogPreference_intentSeparator);
+        mSeparator = mSeparator != null ? mSeparator : "##";
+        mIsSearch = typedArray.getBoolean(R.styleable.IntentDialogPreference_showSearch, true);
+        typedArray.recycle();
+
         setDialogLayoutResource(R.layout.intent_dialog_layout);
         setWidgetLayoutResource(R.layout.intent_preference_app_icon);
     }
@@ -92,23 +94,23 @@ public class IntentDialogPreference extends DialogPreference implements AdapterV
     protected void onBindView(View view) {
         super.onBindView(view);
         getAppIcon();
-        prefAppIcon = (ImageView) view.findViewById(R.id.iconForApp);
-        prefAppIcon.setImageDrawable(appIcon);
+        ImageView prefAppIcon = (ImageView) view.findViewById(R.id.iconForApp);
+        prefAppIcon.setImageDrawable(getAppIcon());
     }
 
     @Override
     protected void onBindDialogView(View view) {
         super.onBindDialogView(view);
-        lv = (ListView) view.findViewById(R.id.appsList);
-        lv.setOnItemClickListener(this);
-        lv.setFastScrollEnabled(true);
-        lv.setFadingEdgeLength(1);
-        lv.setDivider(null);
-        lv.setDividerHeight(0);
-        lv.setScrollingCacheEnabled(false);
-        pb = (ProgressBar) view.findViewById(R.id.progressBar);
-        if (isSearch) {
-            search = (EditText) view.findViewById(R.id.searchApp);
+        mListView = (ListView) view.findViewById(R.id.appsList);
+        mListView.setOnItemClickListener(this);
+        mListView.setFastScrollEnabled(true);
+        mListView.setFadingEdgeLength(1);
+        mListView.setDivider(null);
+        mListView.setDividerHeight(0);
+        mListView.setScrollingCacheEnabled(false);
+        mProgressBar = (ProgressBar) view.findViewById(R.id.progressBar);
+        if (mIsSearch) {
+            EditText search = (EditText) view.findViewById(R.id.searchApp);
             search.setVisibility(View.VISIBLE);
             createList();
             search.addTextChangedListener(new TextWatcher() {
@@ -119,7 +121,7 @@ public class IntentDialogPreference extends DialogPreference implements AdapterV
 
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
-                    appListAdapter.getFilter().filter(s);
+                    mAppListAdapter.getFilter().filter(s);
                 }
 
                 @Override
@@ -135,9 +137,9 @@ public class IntentDialogPreference extends DialogPreference implements AdapterV
 
     @Override
     public void onDismiss(DialogInterface dialog) {
-        if (loadApps != null && loadApps.getStatus() == AsyncTask.Status.RUNNING) {
-            loadApps.cancel(true);
-            loadApps = null;
+        if (mAsyncTask != null && mAsyncTask.getStatus() == AsyncTask.Status.RUNNING) {
+            mAsyncTask.cancel(true);
+            mAsyncTask = null;
         }
     }
 
@@ -148,14 +150,14 @@ public class IntentDialogPreference extends DialogPreference implements AdapterV
 
     @Override
     protected void onSetInitialValue(boolean restoreValue, Object defaultValue) {
-        if (restoreValue) {
-            String value = getPersistedString(null);
-            String appName = getAppName(value);
-            setSummary(appName == null ? mSummary : appName);
-        } else {
-            persistString(null);
-            setSummary(mSummary);
+        String value = Settings.System.getString(getContext().getContentResolver(), getKey());
+        String appName = null;
+        if (value != null) {
+            appName = getAppName(value);
         }
+        setSummary(appName == null ? mSummary : appName);
+        persistString(value);
+
     }
 
     @Override
@@ -183,121 +185,138 @@ public class IntentDialogPreference extends DialogPreference implements AdapterV
     }
 
     private String getAppName(String value) {
-        String[] split = value.split(separator);
-        String pkgName = split[0];
         String appName = null;
-        try {
-            appName = pm.getApplicationInfo(pkgName, 0).loadLabel(pm).toString();
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
+        if (value != null) {
+            String[] split = value.split(mSeparator);
+            String pkgName = split[0];
+            String activity = split[1];
+            Intent intent = new Intent();
+            intent.setComponent(new ComponentName(pkgName, activity));
+            ResolveInfo resolveInfo = mPackageManager.resolveActivity(intent, 0);
+            if (resolveInfo != null) {
+                appName = resolveInfo.activityInfo.loadLabel(mPackageManager).toString();
+            }
+
         }
 
         return appName;
     }
 
-    private List<ApplicationInfo> createAppList() {
-        ArrayList<ApplicationInfo> appList = new ArrayList<ApplicationInfo>();
-        List<ApplicationInfo> list = pm.getInstalledApplications(PackageManager.GET_META_DATA);
-        int l = list.size();
-
-        for (int i = 0; i < l; i++) {
-            try {
-                if (pm.getLaunchIntentForPackage(list.get(i).packageName) != null) {
-                    appList.add(list.get(i));
-                }
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
-        return appList;
-
-    }
 
     public Drawable getAppIcon() {
-        String intent = getPersistedString(null);
-        if (intent != null) {
-            String[] splitValue = intent.split(separator);
+        Drawable appIcon = mContext.getResources().getDrawable(R.mipmap.ic_launcher);
+        String intentString = getPersistedString(null);
+        if (intentString != null) {
+            String[] splitValue = intentString.split(mSeparator);
             String pkg = splitValue[0];
-            try {
-                appIcon = pm.getApplicationIcon(pkg);
-            } catch (PackageManager.NameNotFoundException e) {
-                e.printStackTrace();
+            String activity = splitValue[1];
+            Intent intent = new Intent();
+            intent.setComponent(new ComponentName(pkg, activity));
+            ResolveInfo resolveInfo = mPackageManager.resolveActivity(intent, 0);
+            if (resolveInfo != null) {
+                appIcon = resolveInfo.activityInfo.loadIcon(mPackageManager);
             }
-        } else {
-            appIcon = c.getResources().getDrawable(R.mipmap.ic_launcher);
         }
         return appIcon;
+
     }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        ApplicationInfo appInfo = (ApplicationInfo) parent.getItemAtPosition(position);
-        Intent intent = pm.getLaunchIntentForPackage(appInfo.packageName);
-        ResolveInfo ri = pm.resolveActivity(intent, 0);
-        String launchableActivity = ri.activityInfo.name;
-        String intentString = String.format("%1$s%2$s%3$s", appInfo.packageName, separator, launchableActivity);
-        setSummary(intentString == null ? mSummary : appInfo.loadLabel(pm));
+        AppInfo appInfo = (AppInfo) parent.getItemAtPosition(position);
+        Intent intent = appInfo.mIntent;
+        ResolveInfo ri = mPackageManager.resolveActivity(intent, 0);
+        String intentString = String.format("%1$s%2$s%3$s", appInfo.mPackageName, mSeparator, ri.activityInfo.name);
+        setSummary(intentString == null ? mSummary : appInfo.mAppName);
         persistString(intentString);
-        mValue = intentString;
-        appIcon = appInfo.loadIcon(pm);
+        Drawable appIcon = appInfo.mIcon;
         getDialog().dismiss();
 
     }
 
+    @Override
+    protected boolean persistString(String value) {
+        if (getKey() != null) {
+            Settings.System.putString(getContext().getContentResolver(), getKey(), value);
+        }
+        return super.persistString(value);
+    }
 
     private void createList() {
-        loadApps = new AsyncTask<Void, Void, Void>() {
+        mAsyncTask = new AsyncTask<Void, Void, Void>() {
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
-                pb.setVisibility(View.VISIBLE);
-                pb.refreshDrawableState();
+                mProgressBar.setVisibility(View.VISIBLE);
+                mProgressBar.refreshDrawableState();
             }
 
             @Override
             protected Void doInBackground(Void... params) {
-                mAppList = createAppList();
-                Collections.sort(mAppList, new Comparator<ApplicationInfo>() {
+
+                mAppListAdapter = new AppListAdapter(createAppList());
+                return null;
+            }
+
+            private List<AppInfo> createAppList() {
+                PackageManager packageManager = Constants.CONTEXT.getPackageManager();
+                ArrayList<AppInfo> appList = new ArrayList<>();
+                Intent intent = new Intent(Intent.ACTION_MAIN, null);
+                intent.addCategory(Intent.CATEGORY_LAUNCHER);
+                List<ResolveInfo> resolveInfoList = packageManager.queryIntentActivities(intent, 0);
+
+                for (ResolveInfo resolveInfo : resolveInfoList) {
+                    AppInfo appInfo = new AppInfo();
+                    appInfo.mAppName = resolveInfo.activityInfo.loadLabel(packageManager).toString();
+                    appInfo.mIcon = resolveInfo.activityInfo.loadIcon(packageManager);
+                    appInfo.mPackageName = resolveInfo.activityInfo.packageName;
+                    Intent explicitIntent = new Intent();
+                    explicitIntent.setComponent(new ComponentName(appInfo.mPackageName, resolveInfo.activityInfo.name));
+                    appInfo.mIntent = explicitIntent;
+                    appList.add(appInfo);
+                }
+                Collections.sort(appList, new Comparator<AppInfo>() {
 
                     @Override
-                    public int compare(ApplicationInfo lhs, ApplicationInfo rhs) {
-                        return String.CASE_INSENSITIVE_ORDER.compare(lhs.loadLabel(pm).toString(), rhs.loadLabel(pm).toString());
+                    public int compare(AppInfo lhs, AppInfo rhs) {
+                        return String.CASE_INSENSITIVE_ORDER.compare(lhs.mAppName, rhs.mAppName);
                     }
+
                 });
-                appListAdapter = new AppListAdapter(mAppList);
-                return null;
+                return appList;
+
             }
 
             @Override
             protected void onPostExecute(Void aVoid) {
                 super.onPostExecute(aVoid);
-                pb.setVisibility(View.GONE);
-                lv.setAdapter(appListAdapter);
+                mProgressBar.setVisibility(View.GONE);
+                mListView.setAdapter(mAppListAdapter);
             }
         }.execute();
     }
 
     private class AppListAdapter extends BaseAdapter implements SectionIndexer, Filterable {
 
-        List<ApplicationInfo> mAppList, filteredList;
+        List<AppInfo> mAppList, filteredList;
         private HashMap<String, Integer> alphaIndexer;
         private String[] sections;
 
-        public AppListAdapter(List<ApplicationInfo> appList) {
+        public AppListAdapter(List<AppInfo> appList) {
 
             this.mAppList = appList;
             filteredList = mAppList;
             //adding Indexer to display the first letter of an app while using fast scroll
-            alphaIndexer = new HashMap<String, Integer>();
+            alphaIndexer = new HashMap<>();
             for (int i = 0; i < filteredList.size(); i++) {
-                String s = filteredList.get(i).loadLabel(pm).toString();
+                String s = filteredList.get(i).mAppName;
                 String s1 = s.substring(0, 1).toUpperCase();
                 if (!alphaIndexer.containsKey(s1))
                     alphaIndexer.put(s1, i);
             }
 
             Set<String> sectionLetters = alphaIndexer.keySet();
-            ArrayList<String> sectionList = new ArrayList<String>(sectionLetters);
+            ArrayList<String> sectionList = new ArrayList<>(sectionLetters);
             Collections.sort(sectionList);
             sections = new String[sectionList.size()];
             for (int i = 0; i < sectionList.size(); i++)
@@ -327,15 +346,15 @@ public class IntentDialogPreference extends DialogPreference implements AdapterV
 
         @Override
         public Filter getFilter() {
-            Filter filter = new Filter() {
+            return new Filter() {
 
                 @Override
                 protected FilterResults performFiltering(CharSequence constraint) {
                     FilterResults fr = new FilterResults();
-                    ArrayList<ApplicationInfo> ai = new ArrayList<>();
+                    ArrayList<AppInfo> ai = new ArrayList<>();
 
                     for (int i = 0; i < mAppList.size(); i++) {
-                        String label = mAppList.get(i).loadLabel(pm).toString();
+                        String label = mAppList.get(i).mAppName;
                         if (label.toLowerCase().contains(constraint.toString().toLowerCase())) {
                             ai.add(mAppList.get(i));
                         }
@@ -349,19 +368,11 @@ public class IntentDialogPreference extends DialogPreference implements AdapterV
 
                 @Override
                 protected void publishResults(CharSequence constraint, FilterResults results) {
-                    filteredList = (List<ApplicationInfo>) results.values;
+                    filteredList = (List<AppInfo>) results.values;
                     notifyDataSetChanged();
                 }
             };
-            return filter;
         }
-
-        public class ViewHolder {
-            public TextView mAppNames;
-            public TextView mAppPackage;
-            public ImageView mAppIcon;
-        }
-
 
         @Override
         public int getCount() {
@@ -372,7 +383,7 @@ public class IntentDialogPreference extends DialogPreference implements AdapterV
         }
 
         @Override
-        public ApplicationInfo getItem(int position) {
+        public AppInfo getItem(int position) {
             if (filteredList != null) {
                 return filteredList.get(position);
             }
@@ -384,11 +395,10 @@ public class IntentDialogPreference extends DialogPreference implements AdapterV
             return 0;
         }
 
-
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
-                LayoutInflater inflater = LayoutInflater.from(c);
+                LayoutInflater inflater = LayoutInflater.from(mContext);
                 convertView = inflater.inflate(R.layout.app_item, parent, false);
                 ViewHolder viewHolder = new ViewHolder();
                 viewHolder.mAppNames = (TextView) convertView.findViewById(R.id.appName);
@@ -397,13 +407,26 @@ public class IntentDialogPreference extends DialogPreference implements AdapterV
                 convertView.setTag(viewHolder);
             }
             final ViewHolder holder = (ViewHolder) convertView.getTag();
-            final ApplicationInfo applicationInfo = filteredList.get(position);
+            final AppInfo appInfo = filteredList.get(position);
 
-            holder.mAppNames.setText(applicationInfo.loadLabel(pm));
-            holder.mAppPackage.setText(applicationInfo.packageName);
-            holder.mAppIcon.setImageDrawable(applicationInfo.loadIcon(pm));
+            holder.mAppNames.setText(appInfo.mAppName);
+            holder.mAppPackage.setText(appInfo.mPackageName);
+            holder.mAppIcon.setImageDrawable(appInfo.mIcon);
 
             return convertView;
         }
+
+        public class ViewHolder {
+            public TextView mAppNames;
+            public TextView mAppPackage;
+            public ImageView mAppIcon;
+        }
+    }
+
+    class AppInfo {
+        String mAppName;
+        String mPackageName;
+        Drawable mIcon;
+        Intent mIntent;
     }
 }

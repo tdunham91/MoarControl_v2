@@ -26,6 +26,7 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.preference.Preference;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
@@ -172,6 +173,7 @@ public class ColorPickerPreference
     public void onColorChanged(int color) {
         if (isPersistent()) {
             persistInt(color);
+            Settings.System.putInt(getContext().getContentResolver(), getKey(), color);
         }
         mValue = color;
         setPreviewColor();
