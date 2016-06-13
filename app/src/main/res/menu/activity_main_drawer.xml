@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/sys_ui_prefs"
+            android:icon="@drawable/ic_system_ui"
+            android:title="SystemUI prefs"/>
+        <item
+            android:id="@+id/phone_prefs"
+            android:icon="@drawable/ic_phone"
+            android:title="Phone prefs"/>
+        <item
+            android:id="@+id/framework_prefs"
+            android:icon="@drawable/ic_framework"
+            android:title="Framework prefs"/>
+        <item
+            android:id="@+id/notification_prefs"
+            android:icon="@drawable/ic_notification_panel"
+            android:title="Notification panel prefs"/>
+    </group>
+
+    <item android:title="More options">
+        <menu>
+            <item
+                android:id="@+id/about_us"
+                android:icon="@drawable/ic_info"
+                android:title="About us"/>
+            <item
+                android:id="@+id/themes"
+                android:icon="@drawable/ic_theme"
+                android:title="Set theme"/>
+        </menu>
+    </item>
+
+</menu>

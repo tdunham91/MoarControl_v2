@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+                  xmlns:app="http://schemas.android.com/apk/res-auto">
+    <PreferenceCategory
+        android:title="Test Category">
+        <com.wubydax.romcontrol.prefs.MySwitchPreference
+            android:key="test_switch"
+            android:summaryOff="Disabled"
+            android:summaryOn="Enabled"
+            android:title="Test Switch"/>
+        <com.wubydax.romcontrol.prefs.ColorPickerPreference
+            android:defaultValue="#ffccdd"
+            android:key="test_color"
+            android:title="Test color"/>
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="Useful Apps">
+        <com.wubydax.romcontrol.prefs.OpenAppPreference
+            app:componentName="com.wubydax.geartwswipe/com.wubydax.geartwswipe.ResetDialogActivity"/>
+        <com.wubydax.romcontrol.prefs.OpenAppPreference
+            app:componentName="com.speedsoftware.rootexplorer/com.speedsoftware.rootexplorer.RootExplorer"/>
+        <com.wubydax.romcontrol.prefs.OpenAppPreference
+            app:componentName="com.wubydax.toolboxsettings/com.wubydax.toolboxsettings.ToolboxSettings"/>
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="Scripts">
+        <com.wubydax.romcontrol.prefs.RunScriptPreference
+            android:title="Run script"
+            app:scriptFileName="test.sh"/>
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="Second Test Category">
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="second_test_switch"
+            android:summaryOff="Disabled"
+            android:summaryOn="Enabled"
+            android:title="Second Test Switch"/>
+        <com.wubydax.romcontrol.prefs.ColorPickerPreference
+            android:defaultValue="#ffccdd"
+            android:key="second_test_color"
+            android:title="Second Test Color"/>
+        <PreferenceScreen
+            android:title="Sub Screen Preferences">
+            <PreferenceCategory
+                android:title="Sub Test Category">
+                <SwitchPreference
+                    android:defaultValue="true"
+                    android:key="sub_test_switch"
+                    android:summaryOff="Disabled"
+                    android:summaryOn="Enabled"
+                    android:title="Sub Test Switch"/>
+                <com.wubydax.romcontrol.prefs.ColorPickerPreference
+                    android:defaultValue="#ffccdd"
+                    android:key="sub_test_color"
+                    android:title="Sub Test color"/>
+                <PreferenceScreen
+                    android:title="Sub Sub Screen Preferences">
+                    <PreferenceCategory
+                        android:title="Sub Sub Test Category">
+                        <SwitchPreference
+                            android:defaultValue="true"
+                            android:key="sub_sub_test_switch"
+                            android:summaryOff="Disabled"
+                            android:summaryOn="Enabled"
+                            android:title="Sub Sub Test Switch"/>
+                        <com.wubydax.romcontrol.prefs.ColorPickerPreference
+                            android:defaultValue="#ffccdd"
+                            android:key="sub_sub_test_color"
+                            android:title="Sub Sub Test color"/>
+                    </PreferenceCategory>
+                </PreferenceScreen>
+            </PreferenceCategory>
+        </PreferenceScreen>
+    </PreferenceCategory>
+
+</PreferenceScreen>

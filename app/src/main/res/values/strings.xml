@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Rom Control</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="dialog_color_picker">Pick Color</string>
+    <string name="press_color_to_apply">Press to apply</string>
+    <string name="root_progress_dialog_title">Acquiring Root Access</string>
+    <string name="root_progress_dialog_message">Please wait…</string>
+    <string name="no_su_dialog_title">No root privileges</string>
+    <string name="no_su_dialog_message">We could not acquire root access on your device.\n\nMost of this app\'s functions can be performed without root access. However, you might experience problems with running scripts or rebooting.\n\nWe strongly recommend to allow root access on next request or allow such access in your Su client manually.</string>
+    <string name="no_su_dialog_dismiss_button_text">Whatever, man</string>
+    <string name="command_executed_success_toast">Executed successfully</string>
+    <string name="root_tools_exception_toast">File not found or root denied</string>
+</resources>
