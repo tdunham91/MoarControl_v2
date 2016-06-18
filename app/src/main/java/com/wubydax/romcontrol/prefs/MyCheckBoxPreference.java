@@ -39,6 +39,7 @@ public class MyCheckBoxPreference extends CheckBoxPreference implements Preferen
                 dbInt = (boolean) defaultValue ? 1 : 0;
             }
         }
+        Settings.System.putInt(mContentResolver, getKey(), dbInt);
         persistBoolean(dbInt != 0);
         setChecked(dbInt != 0);
 

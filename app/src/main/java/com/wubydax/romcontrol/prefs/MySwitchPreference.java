@@ -38,6 +38,7 @@ public class MySwitchPreference extends SwitchPreference implements Preference.O
         } catch (Settings.SettingNotFoundException e) {
             if (defaultValue != null) {
                 dbInt = (boolean) defaultValue ? 1 : 0;
+                Settings.System.putInt(mContentResolver, getKey(), dbInt);
             }
         }
         persistBoolean(dbInt != 0);

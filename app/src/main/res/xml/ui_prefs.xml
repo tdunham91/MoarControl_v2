@@ -4,24 +4,52 @@
     <PreferenceCategory
         android:title="Test Category">
         <com.wubydax.romcontrol.prefs.MySwitchPreference
-            android:key="test_switch"
+            android:defaultValue="true"
+            android:key="gear_reboot_view_visibility"
             android:summaryOff="Disabled"
             android:summaryOn="Enabled"
-            android:title="Test Switch"/>
-        <com.wubydax.romcontrol.prefs.MyCheckBoxPreference
-            android:title="Test Checkbox"
-            android:summaryOff="Disabled"
-            android:summaryOn="Enabled"
-            android:key="test_checkbox"/>
+            android:title="Gear reboot view visibility"/>
         <com.wubydax.romcontrol.prefs.ColorPickerPreference
             android:defaultValue="#ffccdd"
-            android:key="test_color"
-            android:title="Test color"/>
+            android:key="gear_reboot_view_color"
+            android:title="Gear reboot view color"/>
+        <com.wubydax.romcontrol.prefs.MyCheckBoxPreference
+            android:defaultValue="true"
+            android:key="test_checkbox"
+            android:summaryOff="Disabled"
+            android:summaryOn="Enabled"
+            android:title="Test Checkbox"/>
+
         <com.wubydax.romcontrol.prefs.IntentDialogPreference
+            android:key="test_intent"
             android:title="Select Test App"
-            app:showSearch="true"
             app:intentSeparator="/"
-            android:key="test_intent"/>
+            app:showSearch="true"/>
+        <com.wubydax.romcontrol.prefs.UriSelectionPreference
+            android:key="test_image_selection_key"
+            android:title="Select Image"/>
+        <com.wubydax.romcontrol.prefs.UriSelectionPreference
+            android:key="test_image_selection_key_2"
+            android:title="Select Image 2"/>
+        <com.wubydax.romcontrol.prefs.UriSelectionPreference
+            android:key="test_image_selection_key_3"
+            android:title="Select Image 3"/>
+        <com.wubydax.romcontrol.prefs.UriSelectionPreference
+            android:key="test_image_selection_key_4"
+            android:title="Select Image 4"/>
+        <com.wubydax.romcontrol.prefs.MyListPreference
+            android:title="Test List Preference"
+            android:entries="@array/test_list_entries"
+            android:entryValues="@array/test_list_values"
+            android:defaultValue="20"
+            android:key="test_list_key"/>
+        <com.wubydax.romcontrol.prefs.MyEditTextPreference
+            android:defaultValue="test"
+            android:key="test_edit_text_key1"
+            android:title="Some edit text"/>
+        <PreferenceScreen
+            android:key="open_reboot"
+            android:title="Open reboot service"/>
     </PreferenceCategory>
     <PreferenceCategory
         android:title="Useful Apps">

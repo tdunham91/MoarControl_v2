@@ -64,10 +64,7 @@ public class OpenAppPreference extends Preference {
         }
     }
 
-    @Override
-    protected View onCreateView(ViewGroup parent) {
-        return super.onCreateView(parent);
-    }
+
 
     @Override
     protected void onClick() {

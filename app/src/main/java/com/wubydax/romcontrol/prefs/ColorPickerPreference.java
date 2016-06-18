@@ -28,6 +28,7 @@ import android.os.Parcelable;
 import android.preference.Preference;
 import android.provider.Settings;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewOutlineProvider;
@@ -48,6 +49,7 @@ public class ColorPickerPreference
         Preference.OnPreferenceClickListener,
         ColorPickerDialog.OnColorChangedListener {
 
+    private static final String LOG_TAG = ColorPickerPreference.class.getSimpleName();
     View mView;
     ColorPickerDialog mDialog;
     private int mValue = Color.BLACK;
@@ -76,18 +78,34 @@ public class ColorPickerPreference
     @Override
     protected Object onGetDefaultValue(TypedArray a, int index) {
         int colorInt;
-        String mHexDefaultValue = a.getString(index);
-        if (mHexDefaultValue != null && mHexDefaultValue.startsWith("#")) {
-            colorInt = convertToColorInt(mHexDefaultValue);
-            return colorInt;
-        } else {
-            return a.getColor(index, Color.BLACK);
+        try {
+            colorInt = Settings.System.getInt(getContext().getContentResolver(), getKey());
+        } catch (Settings.SettingNotFoundException e) {
+            String mHexDefaultValue = a.getString(index);
+            if (mHexDefaultValue != null && mHexDefaultValue.startsWith("#")) {
+                colorInt = convertToColorInt(mHexDefaultValue);
+            } else {
+                colorInt = a.getColor(index, Color.BLACK);
+            }
+
         }
+        persistInt(colorInt);
+        return colorInt;
     }
 
     @Override
     protected void onSetInitialValue(boolean restoreValue, Object defaultValue) {
-        onColorChanged(restoreValue ? getPersistedInt(mValue) : (Integer) defaultValue);
+        int color;
+        try {
+            color = Settings.System.getInt(getContext().getContentResolver(), getKey());
+            Log.d(LOG_TAG, "onSetInitialValue color from db is " + color);
+        } catch (Settings.SettingNotFoundException e) {
+            color = restoreValue ? getPersistedInt(mValue) : (int) defaultValue;
+            Log.d(LOG_TAG, "onSetInitialValue catching exception, color from default is " + color);
+        }
+        Log.d(LOG_TAG, "onSetInitialValue final color is " + color);
+
+        onColorChanged(color);
     }
 
     private void init(Context context, AttributeSet attrs) {
@@ -171,10 +189,9 @@ public class ColorPickerPreference
 
     @Override
     public void onColorChanged(int color) {
-        if (isPersistent()) {
             persistInt(color);
             Settings.System.putInt(getContext().getContentResolver(), getKey(), color);
-        }
+
         mValue = color;
         setPreviewColor();
         try {
