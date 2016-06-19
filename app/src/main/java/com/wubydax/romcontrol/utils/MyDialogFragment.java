@@ -1,9 +1,16 @@
 package com.wubydax.romcontrol.utils;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.content.Context;
 import android.os.Bundle;
+import android.view.ContextThemeWrapper;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.WindowManager;
+import android.widget.Toast;
 
 import com.wubydax.romcontrol.R;
 
@@ -21,8 +28,10 @@ import com.wubydax.romcontrol.R;
         You should have received a copy of the GNU General Public License
         along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
-public class MyDialogFragment extends DialogFragment {
+@SuppressWarnings("unused")
+public class MyDialogFragment extends DialogFragment implements View.OnClickListener {
     private int mRequestCode;
+    private OnDialogFragmentListener mOnDialogFragmentListener;
 
     public static MyDialogFragment newInstance(int requestCode) {
         MyDialogFragment myDialogFragment = new MyDialogFragment();
@@ -38,12 +47,33 @@ public class MyDialogFragment extends DialogFragment {
         switch (mRequestCode) {
             case Constants.NO_SU_DIALOG_REQUEST_CODE:
                 return getNoSuDialog();
+            case Constants.REBOOT_MENU_DIALOG_REQUEST_CODE:
+                setRetainInstance(false);
+                return getRebootMenuDialog();
             default:
                 return super.onCreateDialog(savedInstanceState);
         }
 
 
     }
+
+
+    private Dialog getRebootMenuDialog() {
+        @SuppressLint("InflateParams") View view = LayoutInflater.from(new ContextThemeWrapper(Constants.CONTEXT, R.style.AppTheme)).inflate(R.layout.reboot_layout, null);
+        view.findViewById(R.id.rebootDevice).setOnClickListener(this);
+        view.findViewById(R.id.rebootRecovery).setOnClickListener(this);
+        view.findViewById(R.id.rebootUI).setOnClickListener(this);
+        view.findViewById(R.id.protectiveView).setOnClickListener(this);
+        Dialog dialog = new AlertDialog.Builder(getActivity(), R.style.MyDialogTheme)
+                .setView(view)
+                .create();
+        dialog.getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT);
+        dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN);
+        dialog.getWindow().setBackgroundDrawable(Utils.getDrawable(mOnDialogFragmentListener.getDecorView()));
+        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ERROR);
+        return dialog;
+    }
+
 
     private AlertDialog getNoSuDialog() {
         return new AlertDialog.Builder(getActivity())
@@ -53,5 +83,41 @@ public class MyDialogFragment extends DialogFragment {
                 .create();
     }
 
+    @Override
+    public void onClick(View v) {
+        int id = v.getId();
+        String message = "protective layer clicked";
+        switch (id) {
+            case R.id.rebootDevice:
+                message = "reboot device clicked";
+                break;
+            case R.id.rebootRecovery:
+                message = "reboot recovery clicked";
+                break;
+            case R.id.rebootUI:
+                message = "reboot ui clicked";
+                break;
 
+        }
+        Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+        getDialog().dismiss();
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        mOnDialogFragmentListener = (OnDialogFragmentListener) context;
+    }
+
+    @Override
+    public void onPause() {
+        this.dismiss();
+        super.onPause();
+    }
+
+    public interface OnDialogFragmentListener {
+        void onDialogResult(int requestCode);
+
+        View getDecorView();
+    }
 }

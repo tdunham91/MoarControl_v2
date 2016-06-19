@@ -16,4 +16,8 @@
         <attr name="intentSeparator" format="string"/>
         <attr name="showSearch" format="boolean"/>
     </declare-styleable>
+    <declare-styleable name="RebootView">
+        <attr name="rebootText" format="string"/>
+        <attr name="rebootColor" format="color"/>
+    </declare-styleable>
 </resources>

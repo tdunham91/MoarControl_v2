@@ -27,4 +27,5 @@ public class Constants {
     public static final String SCRIPTS_FOLDER = "scripts";
     public static final String FILES_SCRIPTS_FOLDER_PATH = CONTEXT.getFilesDir().getPath() + File.separator + SCRIPTS_FOLDER;
 
+    public static final int REBOOT_MENU_DIALOG_REQUEST_CODE = 58;
 }

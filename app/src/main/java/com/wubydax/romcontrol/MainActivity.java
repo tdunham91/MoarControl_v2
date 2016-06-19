@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.wubydax.romcontrol.utils.Constants;
 import com.wubydax.romcontrol.utils.MyDialogFragment;
@@ -17,7 +18,8 @@ import com.wubydax.romcontrol.utils.SuTask;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
-        SuTask.OnSuCompletedListener {
+        SuTask.OnSuCompletedListener,
+        MyDialogFragment.OnDialogFragmentListener {
     private ProgressDialog mProgressDialog;
 
     @Override
@@ -71,18 +73,18 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        int id = item.getItemId();
+        switch (id) {
+            case R.id.rebootMenu:
+                getFragmentManager().beginTransaction().add(MyDialogFragment.newInstance(Constants.REBOOT_MENU_DIALOG_REQUEST_CODE), "reboot_dialog").commit();
+                break;
         }
+
 
         return super.onOptionsItemSelected(item);
     }
+
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
@@ -90,8 +92,7 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
         switch (id) {
-            case R.id.action_settings:
-                break;
+
             case R.id.sys_ui_prefs:
                 loadPrefsFragment("ui_prefs");
 
@@ -116,5 +117,16 @@ public class MainActivity extends AppCompatActivity
         if (!isGranted) {
             getFragmentManager().beginTransaction().add(MyDialogFragment.newInstance(Constants.NO_SU_DIALOG_REQUEST_CODE), "no_su_dialog_fragment").commit();
         }
+    }
+
+
+    @Override
+    public void onDialogResult(int requestCode) {
+
+    }
+
+    @Override
+    public View getDecorView() {
+        return getWindow().getDecorView();
     }
 }

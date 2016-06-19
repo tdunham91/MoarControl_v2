@@ -14,4 +14,8 @@
     <string name="no_su_dialog_dismiss_button_text">Whatever, man</string>
     <string name="command_executed_success_toast">Executed successfully</string>
     <string name="root_tools_exception_toast">File not found or root denied</string>
+    <string name="reboot_menu">Reboot menu</string>
+    <string name="reboot_device_text">Reboot Device</string>
+    <string name="reboot_recovery_text">Reboot Recovery</string>
+    <string name="reboot_ui_text">Reboot SystemUI</string>
 </resources>
