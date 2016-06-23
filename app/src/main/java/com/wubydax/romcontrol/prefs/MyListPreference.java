@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -15,6 +16,7 @@ import android.widget.Button;
 import android.widget.ListView;
 
 import com.wubydax.romcontrol.R;
+import com.wubydax.romcontrol.utils.Utils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -33,6 +35,8 @@ import java.util.List;
         You should have received a copy of the GNU General Public License
         along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 public class MyListPreference extends ListPreference implements Preference.OnPreferenceChangeListener {
+    private final String mPackageToKill;
+    private final boolean mIsSilent;
     private ContentResolver mContentResolver;
     private List<CharSequence> mEntries, mValues;
 
@@ -42,6 +46,10 @@ public class MyListPreference extends ListPreference implements Preference.OnPre
         mContentResolver = context.getContentResolver();
         mEntries = Arrays.asList(getEntries());
         mValues = Arrays.asList(getEntryValues());
+        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.MyPreference);
+        mPackageToKill = typedArray.getString(R.styleable.MyPreference_packageNameToKill);
+        mIsSilent = typedArray.getBoolean(R.styleable.MyPreference_isSilent, true);
+        typedArray.recycle();
         setOnPreferenceChangeListener(this);
     }
 
@@ -67,42 +75,37 @@ public class MyListPreference extends ListPreference implements Preference.OnPre
             }
         } else {
             value = getPersistedString(null);
-            if(dbValue != null && !dbValue.equals(value)) {
+            if (dbValue != null && !dbValue.equals(value)) {
                 persistString(dbValue);
                 value = dbValue;
             }
         }
 
         int index = mValues.indexOf(value);
-        if(index != -1) {
+        if (index != -1) {
             setSummary(mEntries.get(index));
             setValue(value);
         }
     }
 
-    @Override
-    protected void showDialog(Bundle state) {
-        super.showDialog(state);
-        TypedValue typedValue = new TypedValue();
-        Resources.Theme theme = getContext().getTheme();
-        theme.resolveAttribute(R.attr.colorAccent, typedValue, true);
-        AlertDialog dialog = (AlertDialog) getDialog();
-        dialog.show();
-        Button cancel = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
-        cancel.setTextColor(typedValue.data);
-        dialog.getWindow().setBackgroundDrawableResource(R.drawable.dialog_bg);
-        ListView lv = dialog.getListView();
-        int padding = Math.round(getContext().getResources().getDimension(R.dimen.dialog_listView_top_padding));
-        lv.setPadding(0, padding, 0, 0);
-    }
+
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
         Settings.System.putString(mContentResolver, getKey(), (String) newValue);
 
         int index = mValues.indexOf(newValue);
-        if(index != -1) {
+        if (index != -1) {
             setSummary(mEntries.get(index));
+        }
+        if (mPackageToKill != null) {
+            if (getContext().getPackageManager().getLaunchIntentForPackage(mPackageToKill) != null) {
+                if (mIsSilent) {
+                    Utils.killPackage(mPackageToKill);
+                } else {
+                    Utils.showKillPackageDialog(mPackageToKill, getContext());
+                }
+            }
         }
         return true;
     }

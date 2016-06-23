@@ -1,10 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="ThumbnailListPreference">
-        <attr name="drawableArray" format="reference" />
-        <attr name="entryList" format="reference" />
-        <attr name="entryValuesList" format="reference" />
-        <attr name="entryDefault" format="string" />
+        <attr name="drawableArray" format="reference"/>
+        <attr name="entryList" format="reference"/>
+        <attr name="entryValuesList" format="reference"/>
+        <attr name="entryDefault" format="string"/>
+    </declare-styleable>
+    <declare-styleable name="MyPreference">
+        <attr name="packageNameToKill" format="string"/>
+        <attr name="isSilent" format="boolean"/>
+    </declare-styleable>
+    <declare-styleable name="MySeekBarPreference">
+        <attr name="minValue" format="integer"/>
+        <attr name="maxValue" format="integer" />
+        <attr name="unitsValue" format="string"/>
     </declare-styleable>
     <declare-styleable name="OpenAppPreference">
         <attr name="componentName" format="string"/>

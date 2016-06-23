@@ -2,10 +2,14 @@ package com.wubydax.romcontrol.prefs;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.preference.Preference;
 import android.preference.SwitchPreference;
 import android.provider.Settings;
 import android.util.AttributeSet;
+
+import com.wubydax.romcontrol.R;
+import com.wubydax.romcontrol.utils.Utils;
 
 /*      Created by Roberto Mariani and Anna Berkovitch, 13/06/2016
         This program is free software: you can redistribute it and/or modify
@@ -23,9 +27,15 @@ import android.util.AttributeSet;
 
 public class MySwitchPreference extends SwitchPreference implements Preference.OnPreferenceChangeListener {
     private ContentResolver mContentResolver;
+    private String mPackageToKill;
+    private boolean mIsSilent;
 
     public MySwitchPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
+        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.MyPreference);
+        mPackageToKill = typedArray.getString(R.styleable.MyPreference_packageNameToKill);
+        mIsSilent = typedArray.getBoolean(R.styleable.MyPreference_isSilent, true);
+        typedArray.recycle();
         mContentResolver = context.getContentResolver();
         setOnPreferenceChangeListener(this);
     }
@@ -51,6 +61,17 @@ public class MySwitchPreference extends SwitchPreference implements Preference.O
         boolean isTrue = (boolean) newValue;
         int dbInt = isTrue ? 1 : 0;
         Settings.System.putInt(mContentResolver, getKey(), dbInt);
+        if(mPackageToKill != null) {
+            if (getContext().getPackageManager().getLaunchIntentForPackage(mPackageToKill) != null) {
+                if (mIsSilent) {
+                    Utils.killPackage(mPackageToKill);
+                } else {
+                    Utils.showKillPackageDialog(mPackageToKill, getContext());
+                }
+            }
+        }
+
         return true;
     }
+
 }

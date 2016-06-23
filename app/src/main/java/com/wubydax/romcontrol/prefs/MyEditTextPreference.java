@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.preference.Preference;
@@ -13,9 +14,9 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
 import android.widget.Button;
-import android.widget.EditText;
 
 import com.wubydax.romcontrol.R;
+import com.wubydax.romcontrol.utils.Utils;
 
 /*      Created by Roberto Mariani and Anna Berkovitch, 08/06/15
         This program is free software: you can redistribute it and/or modify
@@ -32,10 +33,17 @@ import com.wubydax.romcontrol.R;
         along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 public class MyEditTextPreference extends EditTextPreference implements Preference.OnPreferenceChangeListener {
     private static final String LOG_TAG = MyEditTextPreference.class.getName();
-    private ContentResolver mContentResolver;
+    private final boolean mIsSilent;
+    private final String mPackageToKill;
     String mValue;
+    private ContentResolver mContentResolver;
+
     public MyEditTextPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
+        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.MyPreference);
+        mPackageToKill = typedArray.getString(R.styleable.MyPreference_packageNameToKill);
+        mIsSilent = typedArray.getBoolean(R.styleable.MyPreference_isSilent, true);
+        typedArray.recycle();
         mContentResolver = context.getContentResolver();
         setOnPreferenceChangeListener(this);
     }
@@ -48,15 +56,15 @@ public class MyEditTextPreference extends EditTextPreference implements Preferen
         Log.d(LOG_TAG, "onSetInitialValue is called");
         Log.d(LOG_TAG, "onSetInitialValue persisted string at the beginning is " + getPersistedString(null));
         Log.d(LOG_TAG, "onSetInitialValue restoreValue is " + restoreValue);
-        if(!restoreValue && defaultValue != null) {
+        if (!restoreValue && defaultValue != null) {
             Log.d(LOG_TAG, "onSetInitialValue restore value is false condition triggered and default value is not null");
-           String dbValue = Settings.System.getString(mContentResolver, getKey());
-           if(dbValue != null && !dbValue.equals(defaultValue)) {
-               value = dbValue;
-           } else if (dbValue == null) {
-               value = (String) defaultValue;
-               Settings.System.putString(mContentResolver, getKey(), (String) defaultValue);
-           }
+            String dbValue = Settings.System.getString(mContentResolver, getKey());
+            if (dbValue != null && !dbValue.equals(defaultValue)) {
+                value = dbValue;
+            } else if (dbValue == null) {
+                value = (String) defaultValue;
+                Settings.System.putString(mContentResolver, getKey(), (String) defaultValue);
+            }
         } else {
             value = getPersistedString(null);
         }
@@ -70,7 +78,7 @@ public class MyEditTextPreference extends EditTextPreference implements Preferen
     public String getText() {
         String value = Settings.System.getString(mContentResolver, getKey());
         String persistedString = getPersistedString(null);
-        if(value.equals(persistedString)) {
+        if (value.equals(persistedString)) {
             return persistedString;
         } else {
             persistString(value);
@@ -85,33 +93,27 @@ public class MyEditTextPreference extends EditTextPreference implements Preferen
         Log.d(LOG_TAG, "onAttachedToHierarchy persisted string is " + getPersistedString(null));
         String value = Settings.System.getString(mContentResolver, getKey());
         String persistedString = getPersistedString(null);
-        if(value != null && !value.equals(persistedString)) {
+        if (value != null && !value.equals(persistedString)) {
             persistString(value);
             setSummary(value);
             mValue = value;
         }
     }
 
-    @Override
-    protected void showDialog(Bundle state) {
-        super.showDialog(state);
-        TypedValue typedValue = new TypedValue();
-        Resources.Theme theme = getContext().getTheme();
-        theme.resolveAttribute(R.attr.colorAccent, typedValue, true);
-        AlertDialog dialog = (AlertDialog) getDialog();
-        dialog.show();
-        Button cancel = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
-        Button ok = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-        cancel.setTextColor(typedValue.data);
-        ok.setTextColor(typedValue.data);
-        dialog.getWindow().setBackgroundDrawableResource(R.drawable.dialog_bg);
-
-    }
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
         Settings.System.putString(mContentResolver, getKey(), (String) newValue);
         setSummary((String) newValue);
+        if (mPackageToKill != null) {
+            if (getContext().getPackageManager().getLaunchIntentForPackage(mPackageToKill) != null) {
+                if (mIsSilent) {
+                    Utils.killPackage(mPackageToKill);
+                } else {
+                    Utils.showKillPackageDialog(mPackageToKill, getContext());
+                }
+            }
+        }
         return true;
     }
 }

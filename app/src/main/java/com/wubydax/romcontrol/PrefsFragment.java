@@ -1,6 +1,7 @@
 package com.wubydax.romcontrol;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -14,7 +15,13 @@ import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.wubydax.romcontrol.prefs.OpenAppPreference;
@@ -122,7 +129,30 @@ public class PrefsFragment extends PreferenceFragment implements Preference.OnPr
                 Toast.makeText(getActivity(), "Service not found", Toast.LENGTH_SHORT).show();
             }
         }
+        if(((PreferenceScreen) preference).getPreferenceCount() > 0) {
+           setUpNestedPreferenceLayout((PreferenceScreen) preference);
+        }
         return true;
+    }
+
+    private void setUpNestedPreferenceLayout(PreferenceScreen preference) {
+        final Dialog dialog = preference.getDialog();
+        if(dialog != null) {
+            LinearLayout rootView = (LinearLayout) dialog.findViewById(android.R.id.list).getParent();
+            View decorView = dialog.getWindow().getDecorView();
+            if (decorView != null && rootView != null) {
+                Toolbar toolbar = (Toolbar) LayoutInflater.from(getActivity()).inflate(R.layout.nested_preference_toolbar_layout, rootView, false);
+                toolbar.setTitle(preference.getTitle());
+                decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+                rootView.addView(toolbar, 0);
+                toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        dialog.dismiss();
+                    }
+                });
+            }
+        }
     }
 
     @Override
@@ -137,4 +167,6 @@ public class PrefsFragment extends PreferenceFragment implements Preference.OnPr
         getContentIntent.setType("image/*");
         startActivityForResult(getContentIntent, 46);
     }
+
+
 }

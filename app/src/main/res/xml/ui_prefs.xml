@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-                  xmlns:app="http://schemas.android.com/apk/res-auto">
+                  xmlns:wubydax="http://schemas.android.com/apk/res-auto">
     <PreferenceCategory
         android:title="Test Category">
         <com.wubydax.romcontrol.prefs.MySwitchPreference
@@ -8,11 +8,20 @@
             android:key="gear_reboot_view_visibility"
             android:summaryOff="Disabled"
             android:summaryOn="Enabled"
-            android:title="Gear reboot view visibility"/>
+            android:title="Gear reboot view visibility"
+            wubydax:packageNameToKill="com.android.contacts"
+            wubydax:isSilent="false"/>
         <com.wubydax.romcontrol.prefs.ColorPickerPreference
             android:defaultValue="#ffccdd"
             android:key="gear_reboot_view_color"
             android:title="Gear reboot view color"/>
+        <com.wubydax.romcontrol.prefs.MySeekBarPreference
+            android:title="Test Seek Bar"
+            wubydax:minValue="58"
+            wubydax:maxValue="100"
+            android:defaultValue="50"
+            android:key="test_seekbar_key"
+            wubydax:unitsValue="%"/>
         <com.wubydax.romcontrol.prefs.MyCheckBoxPreference
             android:defaultValue="true"
             android:key="test_checkbox"
@@ -23,8 +32,8 @@
         <com.wubydax.romcontrol.prefs.IntentDialogPreference
             android:key="test_intent"
             android:title="Select Test App"
-            app:intentSeparator="/"
-            app:showSearch="true"/>
+            wubydax:intentSeparator="/"
+            wubydax:showSearch="true"/>
         <com.wubydax.romcontrol.prefs.UriSelectionPreference
             android:key="test_image_selection_key"
             android:title="Select Image"/>
@@ -54,17 +63,17 @@
     <PreferenceCategory
         android:title="Useful Apps">
         <com.wubydax.romcontrol.prefs.OpenAppPreference
-            app:componentName="com.wubydax.geartwswipe/com.wubydax.geartwswipe.ResetDialogActivity"/>
+            wubydax:componentName="com.wubydax.geartwswipe/com.wubydax.geartwswipe.ResetDialogActivity"/>
         <com.wubydax.romcontrol.prefs.OpenAppPreference
-            app:componentName="com.speedsoftware.rootexplorer/com.speedsoftware.rootexplorer.RootExplorer"/>
+            wubydax:componentName="com.speedsoftware.rootexplorer/com.speedsoftware.rootexplorer.RootExplorer"/>
         <com.wubydax.romcontrol.prefs.OpenAppPreference
-            app:componentName="com.wubydax.toolboxsettings/com.wubydax.toolboxsettings.ToolboxSettings"/>
+            wubydax:componentName="com.wubydax.toolboxsettings/com.wubydax.toolboxsettings.ToolboxSettings"/>
     </PreferenceCategory>
     <PreferenceCategory
         android:title="Scripts">
         <com.wubydax.romcontrol.prefs.RunScriptPreference
             android:title="Run script"
-            app:scriptFileName="test.sh"/>
+            wubydax:scriptFileName="test.sh"/>
     </PreferenceCategory>
     <PreferenceCategory
         android:title="Second Test Category">

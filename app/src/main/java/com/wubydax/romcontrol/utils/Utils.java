@@ -1,18 +1,26 @@
 package com.wubydax.romcontrol.utils;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.Surface;
 import android.view.View;
+import android.widget.Toast;
 
 import com.stericson.RootShell.exceptions.RootDeniedException;
 import com.stericson.RootShell.execution.Command;
 import com.stericson.RootTools.RootTools;
 import com.wubydax.romcontrol.MyApplication;
+import com.wubydax.romcontrol.R;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -21,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.concurrent.TimeoutException;
 
 /*      Created by Roberto Mariani and Anna Berkovitch, 13/06/2016
@@ -39,6 +48,7 @@ import java.util.concurrent.TimeoutException;
 
 @SuppressWarnings({"ResultOfMethodCallIgnored", "unused"})
 public class Utils {
+
 
 
     public static void copyAssetFolder() {
@@ -355,5 +365,33 @@ public class Utils {
         bitmap.setPixels(pix, 0, w, 0, 0, w, h);
 
         return (bitmap);
+    }
+
+    public static void showKillPackageDialog(final String packageName, Context context) {
+        try {
+            ApplicationInfo applicationInfo = Constants.CONTEXT.getPackageManager().getApplicationInfo(packageName, 0);
+            String appLabel = applicationInfo.loadLabel(Constants.CONTEXT.getPackageManager()).toString();
+            Drawable appIcon = applicationInfo.loadIcon(Constants.CONTEXT.getPackageManager());
+            new AlertDialog.Builder(context)
+                    .setTitle(R.string.app_reboot_required_dialog_title)
+                    .setMessage(String.format(Locale.getDefault(), Constants.CONTEXT.getString(R.string.app_reboot_required_dialog_message), appLabel))
+                    .setIcon(appIcon)
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            killPackage(packageName);
+                        }
+                    })
+                    .create().show();
+        } catch (PackageManager.NameNotFoundException e) {
+            Toast.makeText(Constants.CONTEXT, "App not installed", Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
+
+    public static void killPackage(String packageNameToKill) {
+
     }
 }

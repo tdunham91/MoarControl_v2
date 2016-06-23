@@ -2,10 +2,14 @@ package com.wubydax.romcontrol.prefs;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.preference.CheckBoxPreference;
 import android.preference.Preference;
 import android.provider.Settings;
 import android.util.AttributeSet;
+
+import com.wubydax.romcontrol.R;
+import com.wubydax.romcontrol.utils.Utils;
 
 /*      Created by Roberto Mariani and Anna Berkovitch, 13/06/2016
         This program is free software: you can redistribute it and/or modify
@@ -21,10 +25,16 @@ import android.util.AttributeSet;
         You should have received a copy of the GNU General Public License
         along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 public class MyCheckBoxPreference extends CheckBoxPreference implements Preference.OnPreferenceChangeListener {
+    private final String mPackageToKill;
+    private final boolean mIsSilent;
     private ContentResolver mContentResolver;
 
     public MyCheckBoxPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
+        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.MyPreference);
+        mPackageToKill = typedArray.getString(R.styleable.MyPreference_packageNameToKill);
+        mIsSilent = typedArray.getBoolean(R.styleable.MyPreference_isSilent, true);
+        typedArray.recycle();
         mContentResolver = context.getContentResolver();
         setOnPreferenceChangeListener(this);
     }
@@ -50,6 +60,15 @@ public class MyCheckBoxPreference extends CheckBoxPreference implements Preferen
         boolean isTrue = (boolean) newValue;
         int dbInt = isTrue ? 1 : 0;
         Settings.System.putInt(mContentResolver, getKey(), dbInt);
+        if(mPackageToKill != null) {
+            if (getContext().getPackageManager().getLaunchIntentForPackage(mPackageToKill) != null) {
+                if (mIsSilent) {
+                    Utils.killPackage(mPackageToKill);
+                } else {
+                    Utils.showKillPackageDialog(mPackageToKill, getContext());
+                }
+            }
+        }
         return true;
     }
 }

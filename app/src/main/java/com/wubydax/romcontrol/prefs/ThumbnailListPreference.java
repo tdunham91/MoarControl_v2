@@ -7,6 +7,7 @@ import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.DialogPreference;
+import android.preference.Preference;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -27,7 +28,7 @@ import java.util.Arrays;
 /**
  * Created by Anna Berkovitch on 28/10/2015.
  */
-public class ThumbnailListPreference extends DialogPreference implements AdapterView.OnItemClickListener {
+public class ThumbnailListPreference extends DialogPreference implements AdapterView.OnItemClickListener, Preference.OnPreferenceChangeListener {
     private Context c;
     private Drawable[] thumbnailsArray;
     private Drawable thumbnailIcon;
@@ -162,6 +163,11 @@ public class ThumbnailListPreference extends DialogPreference implements Adapter
         getDialog().dismiss();
         iconView.setImageDrawable(thumbnailIcon);
 
+    }
+
+    @Override
+    public boolean onPreferenceChange(Preference preference, Object newValue) {
+        return false;
     }
 
     private static class ListAdapter extends BaseAdapter {

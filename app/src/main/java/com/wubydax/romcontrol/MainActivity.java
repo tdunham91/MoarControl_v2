@@ -1,7 +1,9 @@
 package com.wubydax.romcontrol;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -25,6 +27,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setTheme(PreferenceManager.getDefaultSharedPreferences(Constants.CONTEXT).getInt(Constants.THEME_PREF_KEY, 0) == 0 ? R.style.AppTheme_NoActionBar : R.style.AppTheme_NoActionBar_Dark);
         setContentView(R.layout.activity_main);
         initViews();
         if (savedInstanceState == null) {
@@ -95,6 +98,13 @@ public class MainActivity extends AppCompatActivity
 
             case R.id.sys_ui_prefs:
                 loadPrefsFragment("ui_prefs");
+                break;
+            case R.id.themes:
+                getFragmentManager().beginTransaction().add(MyDialogFragment.newInstance(Constants.THEME_DIALOG_REQUEST_CODE), "theme_dialog").commit();
+                break;
+            case R.id.changeLog:
+                getFragmentManager().beginTransaction().add(MyDialogFragment.newInstance(Constants.CHANGELOG_DIALOG_REQUEST_CODE), "changelog").commit();
+                break;
 
         }
 
@@ -122,6 +132,14 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onDialogResult(int requestCode) {
+        switch (requestCode) {
+            case Constants.THEME_DIALOG_REQUEST_CODE:
+                finish();
+                this.overridePendingTransition(0, R.animator.fadeout);
+                startActivity(new Intent(this, MainActivity.class));
+                this.overridePendingTransition(R.animator.fadein, 0);
+                break;
+        }
 
     }
 

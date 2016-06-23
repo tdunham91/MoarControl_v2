@@ -5,14 +5,23 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.wubydax.romcontrol.R;
+
+import java.util.Locale;
 
 /*      Created by Roberto Mariani and Anna Berkovitch, 12/06/2016
         This program is free software: you can redistribute it and/or modify
@@ -50,11 +59,47 @@ public class MyDialogFragment extends DialogFragment implements View.OnClickList
             case Constants.REBOOT_MENU_DIALOG_REQUEST_CODE:
                 setRetainInstance(false);
                 return getRebootMenuDialog();
+            case Constants.THEME_DIALOG_REQUEST_CODE:
+                return getThemeChooserDialog();
+            case Constants.CHANGELOG_DIALOG_REQUEST_CODE:
+                return getChangelogDialog();
             default:
                 return super.onCreateDialog(savedInstanceState);
         }
 
 
+    }
+
+    private Dialog getChangelogDialog() {
+        RecyclerView recyclerView = new RecyclerView(getActivity());
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
+        recyclerView.setAdapter(new MyAdapter(getActivity()));
+        return new AlertDialog.Builder(getActivity())
+                .setTitle(String.format(Locale.getDefault(), getString(R.string.changelog_version_title), "build v1.0 6thgearrom".toUpperCase()))
+                .setView(recyclerView)
+                .setPositiveButton(android.R.string.ok, null)
+                .create();
+    }
+
+    private Dialog getThemeChooserDialog() {
+        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(Constants.CONTEXT);
+        final int previouslySelected = sharedPreferences.getInt(Constants.THEME_PREF_KEY, 0);
+        return new AlertDialog.Builder(getActivity())
+
+                .setTitle(R.string.theme_dialog_title)
+                .setSingleChoiceItems(getActivity().getResources().getStringArray(R.array.theme_items), previouslySelected, null)
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        int checked = ((AlertDialog)dialog).getListView().getCheckedItemPosition();
+                        if(mOnDialogFragmentListener != null && previouslySelected != checked) {
+                            sharedPreferences.edit().putInt(Constants.THEME_PREF_KEY, checked).apply();
+                            mOnDialogFragmentListener.onDialogResult(mRequestCode);
+                        }
+                    }
+                })
+                .create();
     }
 
 
@@ -64,7 +109,7 @@ public class MyDialogFragment extends DialogFragment implements View.OnClickList
         view.findViewById(R.id.rebootRecovery).setOnClickListener(this);
         view.findViewById(R.id.rebootUI).setOnClickListener(this);
         view.findViewById(R.id.protectiveView).setOnClickListener(this);
-        Dialog dialog = new AlertDialog.Builder(getActivity(), R.style.MyDialogTheme)
+        Dialog dialog = new AlertDialog.Builder(getActivity(), R.style.RebootDialogTheme)
                 .setView(view)
                 .create();
         dialog.getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT);
@@ -119,5 +164,40 @@ public class MyDialogFragment extends DialogFragment implements View.OnClickList
         void onDialogResult(int requestCode);
 
         View getDecorView();
+    }
+
+    private class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
+        private Context mContext;
+        private String[] mChangelogItems;
+
+        public MyAdapter(Context context) {
+            mContext = context;
+            mChangelogItems = mContext.getResources().getStringArray(R.array.changelog_items);
+        }
+
+        @Override
+        public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View mainView = LayoutInflater.from(mContext).inflate(R.layout.changelog_item, parent, false);
+            return new MyViewHolder(mainView);
+        }
+
+        @Override
+        public void onBindViewHolder(MyViewHolder holder, int position) {
+            holder.mTextView.setText(mChangelogItems[position]);
+        }
+
+        @Override
+        public int getItemCount() {
+            return mChangelogItems != null ? mChangelogItems.length : 0;
+        }
+
+        public class MyViewHolder extends RecyclerView.ViewHolder {
+            TextView mTextView;
+
+            public MyViewHolder(View itemView) {
+                super(itemView);
+                mTextView = (TextView) itemView.findViewById(R.id.changelogText);
+            }
+        }
     }
 }

@@ -30,6 +30,10 @@
                 android:id="@+id/themes"
                 android:icon="@drawable/ic_theme"
                 android:title="Set theme"/>
+            <item
+                android:id="@+id/changeLog"
+                android:icon="@drawable/ic_changelog"
+                android:title="Changelog"/>
         </menu>
     </item>
 

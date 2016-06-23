@@ -18,4 +18,8 @@
     <string name="reboot_device_text">Reboot Device</string>
     <string name="reboot_recovery_text">Reboot Recovery</string>
     <string name="reboot_ui_text">Reboot SystemUI</string>
+    <string name="app_reboot_required_dialog_title">App reboot required</string>
+    <string name="app_reboot_required_dialog_message">For this action to take effect it is required to restart %1$s.\n\nPress ok to restart now</string>
+    <string name="theme_dialog_title">Choose theme</string>
+    <string name="changelog_version_title">ROM version: %1$s</string>
 </resources>

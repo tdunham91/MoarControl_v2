@@ -28,4 +28,7 @@ public class Constants {
     public static final String FILES_SCRIPTS_FOLDER_PATH = CONTEXT.getFilesDir().getPath() + File.separator + SCRIPTS_FOLDER;
 
     public static final int REBOOT_MENU_DIALOG_REQUEST_CODE = 58;
+    public static final int THEME_DIALOG_REQUEST_CODE = 29;
+    public static final String THEME_PREF_KEY = "theme_pref";
+    public static final int CHANGELOG_DIALOG_REQUEST_CODE = 25;
 }
