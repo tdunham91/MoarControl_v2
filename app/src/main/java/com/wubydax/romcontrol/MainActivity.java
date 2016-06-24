@@ -105,6 +105,9 @@ public class MainActivity extends AppCompatActivity
             case R.id.changeLog:
                 getFragmentManager().beginTransaction().add(MyDialogFragment.newInstance(Constants.CHANGELOG_DIALOG_REQUEST_CODE), "changelog").commit();
                 break;
+            case R.id.about_us:
+                startActivity(new Intent(this, AboutActivity.class));
+                break;
 
         }
 

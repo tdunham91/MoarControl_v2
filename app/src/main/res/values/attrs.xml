@@ -29,4 +29,5 @@
         <attr name="rebootText" format="string"/>
         <attr name="rebootColor" format="color"/>
     </declare-styleable>
+    <attr name="about_drawables" format="reference"/>
 </resources>

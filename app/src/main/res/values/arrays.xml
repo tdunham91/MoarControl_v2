@@ -17,11 +17,11 @@
         <item>Dark theme</item>
     </string-array>
     <string-array name="changelog_items">
-        <item>Some changelog thing</item>
-        <item>Another changelog thing</item>
+        <item>Some changelog thing lkjh l lkjh slkjh lkjh s,mnb lkjhs lkjh poiuy slkjh</item>
+        <item>Another changelog thing ;lkj d;lkj ;lkjs ;lkj ;lkj s;lkj ;lkj s;lkj ;lkj ;lks ;lkj ;lkj</item>
         <item>Some more changelog things</item>
         <item>Some even more changelog thing</item>
-        <item>And another changelog thing</item>
+        <item>And another changelog thing ;lsj; lkjs ;lkj ; lkj;lsjk ;sklj s;lkj s;lk js;lkj s;lkj</item>
         <item>How many changelog things</item>
         <item>What a long changelog!!!</item>
         <item>Is it twenty already?</item>
@@ -33,5 +33,41 @@
         <item>No disassemble…</item>
         <item>Almost there</item>
         <item>Done with changelog</item>
+    </string-array>
+    <array name="about_contact_us_drawables">
+        <item>@drawable/icon_2</item>
+        <item>@drawable/icon_1</item>
+        <item>@drawable/icon_3</item>
+    </array>
+    <string-array name="about_contact_us_text">
+        <item>Facebook</item>
+        <item>Our Site</item>
+        <item>XDA</item>
+    </string-array>
+    <array name="about_team_drawables">
+        <item>@drawable/icon_5</item>
+        <item>@drawable/icon_6</item>
+        <item>@drawable/icon_1</item>
+    </array>
+    <string-array name="about_team_names">
+        <item>Master Yoda - wise and talented lead developer</item>
+        <item>Luke Skywalker - one handed theme master</item>
+        <item>Darth Vader - dark theme master</item>
+    </string-array>
+    <array name="about_credits_drawables">
+        <item>@drawable/icon_1</item>
+        <item>@drawable/icon_3</item>
+        <item>@drawable/icon_4</item>
+        <item>@drawable/icon_2</item>
+        <item>@drawable/icon_6</item>
+        <item>@drawable/icon_5</item>
+    </array>
+    <string-array name="about_credits_names">
+        <item>Star Trek - for being ultimately better than Star Wars</item>
+        <item>Jean-Luc Picard - for making us crave hot earl-grey tea even in the middle of the summer</item>
+        <item>Data - for running on the best rom. Google, we still are waiting for THAT android version</item>
+        <item>Janeway - for being a normal person and drinking black coffee</item>
+        <item>Q - for reminding us that you can live forever and still look great</item>
+        <item>Worf - for teaching us to love Klingons. It was NOT easy</item>
     </string-array>
 </resources>
