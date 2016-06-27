@@ -11,7 +11,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.util.Log;
-import android.view.ContextThemeWrapper;
 import android.view.Surface;
 import android.view.View;
 import android.widget.Toast;
@@ -50,24 +49,31 @@ import java.util.concurrent.TimeoutException;
 public class Utils {
 
 
+    private static final String LOG_TAG = "RomControlUtils";
 
     public static void copyAssetFolder() {
 
 
         try {
             String[] scriptsInAssets = Constants.CONTEXT.getAssets().list(Constants.SCRIPTS_FOLDER);
+            Log.d(LOG_TAG, "copyAssetFolder " + scriptsInAssets[0]);
             File scriptsFilesDir = new File(Constants.FILES_SCRIPTS_FOLDER_PATH);
             //Checking if the "scripts" directory exists in files
             if (!scriptsFilesDir.exists()) {
                 new File(Constants.FILES_SCRIPTS_FOLDER_PATH).mkdirs();
             }
-            for (String file : scriptsInAssets)
+            for (String file : scriptsInAssets) {
                 //If the file name contains  a dot, it's most probably a single file and not dir. So treating it as copying file
-                if (file.contains("."))
+                Log.d(LOG_TAG, "copyAssetFolder " + file);
+                if (file.contains(".")) {
                     copyAsset(scriptsInAssets, Constants.SCRIPTS_FOLDER + File.separator + file, Constants.FILES_SCRIPTS_FOLDER_PATH + File.separator + file);
-                else
+                }
+                else {
                     //Otherwise treating as copying dir
                     copyAssetFolder();
+                }
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }

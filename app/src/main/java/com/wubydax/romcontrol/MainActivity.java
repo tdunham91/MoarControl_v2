@@ -1,5 +1,6 @@
 package com.wubydax.romcontrol;
 
+import android.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,7 +14,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import com.wubydax.romcontrol.utils.BackupRestoreIntentService;
 import com.wubydax.romcontrol.utils.Constants;
@@ -25,12 +25,14 @@ public class MainActivity extends AppCompatActivity
         SuTask.OnSuCompletedListener,
         MyDialogFragment.OnDialogFragmentListener {
     private ProgressDialog mProgressDialog;
+    private FragmentManager mFragmentManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setTheme(PreferenceManager.getDefaultSharedPreferences(Constants.CONTEXT).getInt(Constants.THEME_PREF_KEY, 0) == 0 ? R.style.AppTheme_NoActionBar : R.style.AppTheme_NoActionBar_Dark);
         setContentView(R.layout.activity_main);
+        mFragmentManager = getFragmentManager();
         initViews();
         if (savedInstanceState == null) {
             loadPrefsFragment("ui_prefs");
@@ -71,7 +73,6 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
@@ -82,7 +83,7 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
         switch (id) {
             case R.id.rebootMenu:
-                getFragmentManager().beginTransaction().add(MyDialogFragment.newInstance(Constants.REBOOT_MENU_DIALOG_REQUEST_CODE), "reboot_dialog").commit();
+                mFragmentManager.beginTransaction().add(MyDialogFragment.newInstance(Constants.REBOOT_MENU_DIALOG_REQUEST_CODE), "reboot_dialog").commit();
                 break;
         }
 
@@ -102,16 +103,16 @@ public class MainActivity extends AppCompatActivity
                 loadPrefsFragment("ui_prefs");
                 break;
             case R.id.themes:
-                getFragmentManager().beginTransaction().add(MyDialogFragment.newInstance(Constants.THEME_DIALOG_REQUEST_CODE), "theme_dialog").commit();
+                mFragmentManager.beginTransaction().add(MyDialogFragment.newInstance(Constants.THEME_DIALOG_REQUEST_CODE), "theme_dialog").commit();
                 break;
             case R.id.changeLog:
-                getFragmentManager().beginTransaction().add(MyDialogFragment.newInstance(Constants.CHANGELOG_DIALOG_REQUEST_CODE), "changelog").commit();
+                mFragmentManager.beginTransaction().add(MyDialogFragment.newInstance(Constants.CHANGELOG_DIALOG_REQUEST_CODE), "changelog").commit();
                 break;
             case R.id.about_us:
                 startActivity(new Intent(this, AboutActivity.class));
                 break;
             case R.id.backup_restore:
-                getFragmentManager().beginTransaction().add(MyDialogFragment.newInstance(Constants.BACKUP_OR_RESTORE_DIALOG_REQUEST_CODE), "backup_restore").commit();
+                mFragmentManager.beginTransaction().add(MyDialogFragment.newInstance(Constants.BACKUP_OR_RESTORE_DIALOG_REQUEST_CODE), "backup_restore").commit();
                 break;
 
         }
@@ -139,11 +140,14 @@ public class MainActivity extends AppCompatActivity
         if (action != null) {
             intent.setAction(action);
             startService(intent);
+            if (which == 1) {
+                finish();
+            }
         }
     }
 
     private void loadPrefsFragment(String prefName) {
-        getFragmentManager().beginTransaction().replace(R.id.fragment_container, PrefsFragment.newInstance(prefName)).commit();
+        mFragmentManager.beginTransaction().replace(R.id.fragment_container, PrefsFragment.newInstance(prefName)).commit();
     }
 
 
@@ -153,7 +157,7 @@ public class MainActivity extends AppCompatActivity
             mProgressDialog.dismiss();
         }
         if (!isGranted) {
-            getFragmentManager().beginTransaction().add(MyDialogFragment.newInstance(Constants.NO_SU_DIALOG_REQUEST_CODE), "no_su_dialog_fragment").commit();
+            mFragmentManager.beginTransaction().add(MyDialogFragment.newInstance(Constants.NO_SU_DIALOG_REQUEST_CODE), "no_su_dialog_fragment").commit();
         }
     }
 
@@ -178,18 +182,17 @@ public class MainActivity extends AppCompatActivity
                 launchBackupRestoreService(which, null);
                 break;
             case 1:
-                getFragmentManager().beginTransaction().add(MyDialogFragment.newInstance(Constants.RESTORE_FILE_SELECTOR_DIALOG_REQUEST_CODE), "restore_selector").commit();
+                mFragmentManager.beginTransaction().add(MyDialogFragment.newInstance(Constants.RESTORE_FILE_SELECTOR_DIALOG_REQUEST_CODE), "restore_selector").commit();
                 break;
         }
     }
 
     @Override
     public void onRestoreRequested(String filePath, boolean isConfirmed) {
-        Toast.makeText(MainActivity.this, filePath, Toast.LENGTH_SHORT).show();
         if (isConfirmed) {
             launchBackupRestoreService(1, filePath);
         } else {
-            getFragmentManager().beginTransaction().add(MyDialogFragment.backupRestoreInstance(Constants.RESTORE_FILE_SELECTOR_DIALOG_REQUEST_CODE, true, filePath), "restore_confirm").commit();
+            mFragmentManager.beginTransaction().add(MyDialogFragment.backupRestoreInstance(Constants.RESTORE_FILE_SELECTOR_DIALOG_REQUEST_CODE, true, filePath), "restore_confirm").commit();
         }
     }
 

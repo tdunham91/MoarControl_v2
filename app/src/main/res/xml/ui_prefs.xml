@@ -9,18 +9,18 @@
             android:summaryOff="Disabled"
             android:summaryOn="Enabled"
             android:title="Gear reboot view visibility"
-            wubydax:packageNameToKill="com.android.contacts"
-            wubydax:isSilent="false"/>
+            wubydax:isSilent="false"
+            wubydax:packageNameToKill="com.android.contacts"/>
         <com.wubydax.romcontrol.prefs.ColorPickerPreference
             android:defaultValue="#ffccdd"
             android:key="gear_reboot_view_color"
             android:title="Gear reboot view color"/>
         <com.wubydax.romcontrol.prefs.MySeekBarPreference
-            android:title="Test Seek Bar"
-            wubydax:minValue="58"
-            wubydax:maxValue="100"
             android:defaultValue="50"
             android:key="test_seekbar_key"
+            android:title="Test Seek Bar"
+            wubydax:maxValue="100"
+            wubydax:minValue="58"
             wubydax:unitsValue="%"/>
         <com.wubydax.romcontrol.prefs.MyCheckBoxPreference
             android:defaultValue="true"
@@ -47,11 +47,11 @@
             android:key="test_image_selection_key_4"
             android:title="Select Image 4"/>
         <com.wubydax.romcontrol.prefs.MyListPreference
-            android:title="Test List Preference"
+            android:defaultValue="20"
             android:entries="@array/test_list_entries"
             android:entryValues="@array/test_list_values"
-            android:defaultValue="20"
-            android:key="test_list_key"/>
+            android:key="test_list_key"
+            android:title="Test List Preference"/>
         <com.wubydax.romcontrol.prefs.MyEditTextPreference
             android:defaultValue="test"
             android:key="test_edit_text_key1"
@@ -59,6 +59,19 @@
         <PreferenceScreen
             android:key="open_reboot"
             android:title="Open reboot service"/>
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="File preferences">
+        <com.wubydax.romcontrol.prefs.FilePreference
+            android:key="new_file"
+            android:summaryOff="Disabled"
+            android:summaryOn="Enabled"
+            android:title="New file preference"/>
+        <com.wubydax.romcontrol.prefs.FilePreference
+            android:key="another_file"
+            android:summaryOff="Disabled"
+            android:summaryOn="Enabled"
+            android:title="Another file preference"/>
     </PreferenceCategory>
     <PreferenceCategory
         android:title="Useful Apps">

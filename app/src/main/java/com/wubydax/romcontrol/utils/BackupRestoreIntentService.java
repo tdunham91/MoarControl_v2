@@ -12,10 +12,18 @@ import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.wubydax.romcontrol.MainActivity;
+import com.wubydax.romcontrol.R;
+
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
@@ -52,7 +60,41 @@ public class BackupRestoreIntentService extends IntentService {
         }
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     private void restoreValues(String filePath) {
+        FileInputStream fileInputStream;
+        BufferedReader bufferedReader;
+        File backUpFile = new File(filePath);
+            try {
+                fileInputStream = new FileInputStream(backUpFile);
+                bufferedReader = new BufferedReader(new InputStreamReader(fileInputStream));
+                String line;
+                while ((line=bufferedReader.readLine())!=null) {
+                    if(!line.equals("")) {
+                        if(line.contains("###")){
+                            String[] data = line.split("###");
+                            Settings.System.putString(getContentResolver(), data[0], data[1]);
+                        } else {
+                            File file = new File(getFilesDir() + File.separator + line);
+                            try {
+                                file.createNewFile();
+                                BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(file), 16 * 1024);
+                                bufferedOutputStream.close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                    }
+                    Log.d(LOG_TAG, "restoreValues " + line);
+                }
+                fileInputStream.close();
+                bufferedReader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                sendBroadcast(new Intent(LocalReceiver.RESTORE_COMPLETE_ACTION));
+            }
 
     }
 
@@ -70,8 +112,18 @@ public class BackupRestoreIntentService extends IntentService {
                     String key = singlePref.getKey();
                     String dbValue = Settings.System.getString(getContentResolver(), key);
                     if (dbValue != null) {
-                        stringBuilder.append(key).append(": ").append(dbValue).append("\n");
+                        stringBuilder.append(key).append("###").append(dbValue).append("\n");
                     }
+                }
+            }
+        }
+        File filesFolder = new File(getFilesDir().getAbsolutePath());
+        File[] filesInData = filesFolder.listFiles();
+        if(filesInData.length > 0) {
+            for(File file : filesInData) {
+                String fileName = file.getName();
+                if(!fileName.equals("scripts") && !fileName.contains("rList")) {
+                    stringBuilder.append(fileName).append("\n");
                 }
             }
         }
@@ -80,16 +132,17 @@ public class BackupRestoreIntentService extends IntentService {
     }
 
     private void makeBackup(String backupString) {
-        String currentDate = new SimpleDateFormat("dd-MMM-yyyy_HH:mm", Locale.ENGLISH).format(Calendar.getInstance().getTime());
+        String currentDate = new SimpleDateFormat(getString(R.string.backup_file_prefix_date_format), Locale.ENGLISH).format(Calendar.getInstance().getTime());
         String fileName = currentDate + "_" + Build.DISPLAY;
-        String backupFileName = fileName + "_RCBackup";
+        String backupFileName = fileName + getString(R.string.backup_file_suffix);
         File newBackupFile = new File(Constants.BACKUP_FOLDER_PATH + File.separator + backupFileName);
+
         try {
             BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(newBackupFile));
             bufferedWriter.write(backupString);
             bufferedWriter.close();
             Intent intent = new Intent(LocalReceiver.BACKUP_COMPLETE_ACTION);
-            intent.putExtra(Constants.BACKUP_FILE_PATH_EXTRA_KEY, newBackupFile.getAbsolutePath());
+            intent.putExtra(Constants.BACKUP_FILE_PATH_EXTRA_KEY, String.format(Locale.getDefault(), getString(R.string.backup_complete_toast), newBackupFile.getAbsoluteFile()));
             sendBroadcast(intent);
         } catch (IOException e) {
             e.printStackTrace();
@@ -111,15 +164,15 @@ public class BackupRestoreIntentService extends IntentService {
     }
 
     public class UiThreadRunnable implements Runnable {
-        private String mFilePath;
+        private String mMessage;
 
-        public UiThreadRunnable(String filePath) {
-            mFilePath = filePath;
+        public UiThreadRunnable(String message) {
+            mMessage = message;
         }
 
         @Override
         public void run() {
-            Toast.makeText(Constants.CONTEXT, "Backup finished successfully and can be found at " + mFilePath, Toast.LENGTH_SHORT).show();
+            Toast.makeText(Constants.CONTEXT, mMessage, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -136,6 +189,11 @@ public class BackupRestoreIntentService extends IntentService {
                     handler.post(new UiThreadRunnable(filePath));
                     break;
                 case RESTORE_COMPLETE_ACTION:
+                    String complete = getString(R.string.restore_complete_toast);
+                    handler.post(new UiThreadRunnable(complete));
+                    Intent startMainActivity = new Intent(context, MainActivity.class);
+                    startMainActivity.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(startMainActivity);
                     break;
             }
             unregisterReceiver(this);

@@ -14,6 +14,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.DialogPreference;
 import android.preference.Preference;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -161,6 +162,15 @@ public class IntentDialogPreference extends DialogPreference implements AdapterV
     }
 
     @Override
+    protected void onAttachedToHierarchy(PreferenceManager preferenceManager) {
+        super.onAttachedToHierarchy(preferenceManager);
+        String value = Settings.System.getString(mContext.getContentResolver(), getKey());
+        if(value != null) {
+            setSummary(getAppName(value));
+        }
+    }
+
+    @Override
     protected void showDialog(Bundle state) {
         super.showDialog(state);
         TypedValue typedValue = new TypedValue();
@@ -205,7 +215,7 @@ public class IntentDialogPreference extends DialogPreference implements AdapterV
 
     public Drawable getAppIcon() {
         Drawable appIcon = mContext.getResources().getDrawable(R.mipmap.ic_launcher);
-        String intentString = getPersistedString(null);
+        String intentString = Settings.System.getString(mContext.getContentResolver(), getKey());
         if (intentString != null) {
             String[] splitValue = intentString.split(mSeparator);
             String pkg = splitValue[0];

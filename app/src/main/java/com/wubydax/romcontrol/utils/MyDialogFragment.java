@@ -93,7 +93,7 @@ public class MyDialogFragment extends DialogFragment implements View.OnClickList
     private Dialog getRestoreConfirmDialog(final String filePath) {
         return new AlertDialog.Builder(getActivity())
                 .setTitle(R.string.restore_confirm_dialog_title)
-                .setMessage(String.format(Locale.getDefault(), getString(R.string.restore_confirm_message), filePath))
+                .setMessage(getText(R.string.restore_confirm_message))
                 .setNegativeButton(android.R.string.cancel, null)
                 .setPositiveButton("confirm", new DialogInterface.OnClickListener() {
                     @Override

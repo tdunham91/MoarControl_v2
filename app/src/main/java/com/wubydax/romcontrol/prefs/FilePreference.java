@@ -2,15 +2,9 @@ package com.wubydax.romcontrol.prefs;
 
 import android.content.Context;
 import android.preference.Preference;
+import android.preference.PreferenceManager;
 import android.preference.SwitchPreference;
-import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.view.View;
-import android.widget.CompoundButton;
-import android.widget.Switch;
-import android.widget.TextView;
-
-import com.wubydax.romcontrol.R;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -30,109 +24,43 @@ import java.io.IOException;
 
         You should have received a copy of the GNU General Public License
         along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
-public class FilePreference extends SwitchPreference implements CompoundButton.OnCheckedChangeListener, Preference.OnPreferenceClickListener {
-    String key;
-    String defaultNameSpace;
-    CharSequence summaryOn, summaryOff;
-    File file;
-    boolean isOn;
-    Context c;
-    Switch swView;
+public class FilePreference extends SwitchPreference implements Preference.OnPreferenceChangeListener {
+    File mFile;
 
     public FilePreference(Context context, AttributeSet attrs) {
         super(context, attrs);
-        c = context;
-        setWidgetLayoutResource(R.layout.file_preference_widget);
-        defaultNameSpace = "http://schemas.android.com/apk/res/android";
-        key = getStringForAttr(attrs, defaultNameSpace, "key", "file");
-        summaryOn = getStringForAttr(attrs, defaultNameSpace, "summaryOn", "");
-        summaryOff = getStringForAttr(attrs, defaultNameSpace, "summaryOff", "");
-        //We will store our files inside package default files dir in /data/data/packagename/files
-        file = new File(c.getFilesDir() + File.separator + key);
-        isOn = file.exists() ? true : false;
-        FilePreference.this.setOnPreferenceClickListener(this);
-    }
-
-    //Method to get the strings we need from our xml attributes in default android name space
-    private String getStringForAttr(AttributeSet attrs, String ns, String attrName, String defaultValue) {
-        String value = attrs.getAttributeValue(ns, attrName);
-        if (value == null)
-            value = defaultValue;
-        return value;
+        setOnPreferenceChangeListener(this);
     }
 
     @Override
-    protected void onBindView(View view) {
-        super.onBindView(view);
-        swView = (Switch) view.findViewById(R.id.fileSwitch);
-        swView.setChecked(isOn);
-        String isOnValue = String.valueOf(isOn);
-        String persistedBoolValue = String.valueOf(getPersistedBoolean(false));
-        if (!isOnValue.equals(persistedBoolValue)) {
-            persistBoolean(isOn);
-        }
-        syncSummaryView(view);
-        swView.setOnCheckedChangeListener(this);
-    }
-
-    //Sync summary on/off with persisted boolean in onBindView
-    void syncSummaryView(View view) {
-        TextView summaryView = (TextView) view.findViewById(android.R.id.summary);
-        if (summaryView != null) {
-            boolean useDefaultSummary = true;
-            if (isOn && !TextUtils.isEmpty(summaryOn)) {
-                summaryView.setText(summaryOn);
-                useDefaultSummary = false;
-            } else if (!isOn && !TextUtils.isEmpty(summaryOff)) {
-                summaryView.setText(summaryOff);
-                useDefaultSummary = false;
-            }
-            if (useDefaultSummary) {
-                final CharSequence summary = getSummary();
-                if (!TextUtils.isEmpty(summary)) {
-                    summaryView.setText(summary);
-                    useDefaultSummary = false;
-                }
-            }
-            int newVisibility = View.GONE;
-            if (!useDefaultSummary) {
-                // Someone has written to it
-                newVisibility = View.VISIBLE;
-            }
-            if (newVisibility != summaryView.getVisibility()) {
-                summaryView.setVisibility(newVisibility);
-            }
-        }
+    protected void onAttachedToHierarchy(PreferenceManager preferenceManager) {
+        super.onAttachedToHierarchy(preferenceManager);
+        mFile = new File(getContext().getFilesDir() + File.separator + getKey());
+        boolean isOn = mFile.exists();
+        setChecked(isOn);
     }
 
 
     @Override
-    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        //Once the switch has been switched on/off, persist the boolean into the preferences
-        persistBoolean(isChecked);
-        notifyChanged();
+    protected boolean persistBoolean(boolean value) {
+        return false;
     }
 
-
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     @Override
-    public boolean onPreferenceClick(Preference preference) {
-        if (swView.isChecked()) {
-            //If switch is on, delete the file and switch it off
-            file.delete();
-            isOn = false;
-
-        } else {
-            //If the switch is on, create the file and switch it off
+    public boolean onPreferenceChange(Preference preference, Object newValue) {
+        boolean isChecked = (boolean) newValue;
+        if(isChecked) {
             try {
-                file.createNewFile();
-                BufferedOutputStream fout = new BufferedOutputStream(new FileOutputStream(file), 16 * 1024);
-                fout.close();
-                isOn = true;
+                mFile.createNewFile();
+                BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(mFile), 16 * 1024);
+                bufferedOutputStream.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        } else {
+            mFile.delete();
         }
-        swView.setChecked(isOn);
         return true;
     }
 }
