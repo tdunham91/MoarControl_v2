@@ -159,29 +159,28 @@ public class Utils {
     }
 
     /*Stack Blur Algorithm by Mario Klingemann <mario@quasimondo.com>*/
-    private static Bitmap getBlurredImage(Bitmap sentBitmap, float scale, int radius) {
+    private static Bitmap getBlurredImage(Bitmap originalBitmap, float scaleMeasure, int blurRadius) {
 
-        int width = Math.round(sentBitmap.getWidth() * scale);
-        int height = Math.round(sentBitmap.getHeight() * scale);
-        sentBitmap = Bitmap.createScaledBitmap(sentBitmap, width, height, false);
+        int width = Math.round(originalBitmap.getWidth() * scaleMeasure);
+        int height = Math.round(originalBitmap.getHeight() * scaleMeasure);
+        originalBitmap = Bitmap.createScaledBitmap(originalBitmap, width, height, false);
 
-        Bitmap bitmap = sentBitmap.copy(sentBitmap.getConfig(), true);
+        Bitmap newBitmap = originalBitmap.copy(originalBitmap.getConfig(), true);
 
-        if (radius < 1) {
+        if (blurRadius < 1) {
             return (null);
         }
 
-        int w = bitmap.getWidth();
-        int h = bitmap.getHeight();
+        int w = newBitmap.getWidth();
+        int h = newBitmap.getHeight();
 
         int[] pix = new int[w * h];
-        Log.e("pix", w + " " + h + " " + pix.length);
-        bitmap.getPixels(pix, 0, w, 0, 0, w, h);
+        newBitmap.getPixels(pix, 0, w, 0, 0, w, h);
 
         int wm = w - 1;
         int hm = h - 1;
         int wh = w * h;
-        int div = radius + radius + 1;
+        int div = blurRadius + blurRadius + 1;
 
         int r[] = new int[wh];
         int g[] = new int[wh];
@@ -203,15 +202,15 @@ public class Utils {
         int stackStart;
         int[] sir;
         int rbs;
-        int r1 = radius + 1;
+        int r1 = blurRadius + 1;
         int routSum, goutSum, boutSum;
         int rinSum, ginSum, binSum;
 
         for (y = 0; y < h; y++) {
             rinSum = ginSum = binSum = routSum = goutSum = boutSum = rSum = gSum = bSum = 0;
-            for (i = -radius; i <= radius; i++) {
+            for (i = -blurRadius; i <= blurRadius; i++) {
                 p = pix[yi + Math.min(wm, Math.max(i, 0))];
-                sir = stack[i + radius];
+                sir = stack[i + blurRadius];
                 sir[0] = (p & 0xff0000) >> 16;
                 sir[1] = (p & 0x00ff00) >> 8;
                 sir[2] = (p & 0x0000ff);
@@ -229,7 +228,7 @@ public class Utils {
                     boutSum += sir[2];
                 }
             }
-            stackPointer = radius;
+            stackPointer = blurRadius;
 
             for (x = 0; x < w; x++) {
 
@@ -241,7 +240,7 @@ public class Utils {
                 gSum -= goutSum;
                 bSum -= boutSum;
 
-                stackStart = stackPointer - radius + div;
+                stackStart = stackPointer - blurRadius + div;
                 sir = stack[stackStart % div];
 
                 routSum -= sir[0];
@@ -249,7 +248,7 @@ public class Utils {
                 boutSum -= sir[2];
 
                 if (y == 0) {
-                    vMin[x] = Math.min(x + radius + 1, wm);
+                    vMin[x] = Math.min(x + blurRadius + 1, wm);
                 }
                 p = pix[yw + vMin[x]];
 
@@ -282,11 +281,11 @@ public class Utils {
         }
         for (x = 0; x < w; x++) {
             rinSum = ginSum = binSum = routSum = goutSum = boutSum = rSum = gSum = bSum = 0;
-            yp = -radius * w;
-            for (i = -radius; i <= radius; i++) {
+            yp = -blurRadius * w;
+            for (i = -blurRadius; i <= blurRadius; i++) {
                 yi = Math.max(0, yp) + x;
 
-                sir = stack[i + radius];
+                sir = stack[i + blurRadius];
 
                 sir[0] = r[yi];
                 sir[1] = g[yi];
@@ -313,16 +312,15 @@ public class Utils {
                 }
             }
             yi = x;
-            stackPointer = radius;
+            stackPointer = blurRadius;
             for (y = 0; y < h; y++) {
-                // Preserve alpha channel: ( 0xff000000 & pix[yi] )
                 pix[yi] = (0xff000000 & pix[yi]) | (dv[rSum] << 16) | (dv[gSum] << 8) | dv[bSum];
 
                 rSum -= routSum;
                 gSum -= goutSum;
                 bSum -= boutSum;
 
-                stackStart = stackPointer - radius + div;
+                stackStart = stackPointer - blurRadius + div;
                 sir = stack[stackStart % div];
 
                 routSum -= sir[0];
@@ -361,10 +359,9 @@ public class Utils {
             }
         }
 
-        Log.e("pix", w + " " + h + " " + pix.length);
-        bitmap.setPixels(pix, 0, w, 0, 0, w, h);
+        newBitmap.setPixels(pix, 0, w, 0, 0, w, h);
 
-        return (bitmap);
+        return (newBitmap);
     }
 
     public static void showKillPackageDialog(final String packageName, Context context) {

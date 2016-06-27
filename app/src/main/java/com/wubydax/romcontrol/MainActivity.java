@@ -13,7 +13,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
+import com.wubydax.romcontrol.utils.BackupRestoreIntentService;
 import com.wubydax.romcontrol.utils.Constants;
 import com.wubydax.romcontrol.utils.MyDialogFragment;
 import com.wubydax.romcontrol.utils.SuTask;
@@ -108,6 +110,9 @@ public class MainActivity extends AppCompatActivity
             case R.id.about_us:
                 startActivity(new Intent(this, AboutActivity.class));
                 break;
+            case R.id.backup_restore:
+                getFragmentManager().beginTransaction().add(MyDialogFragment.newInstance(Constants.BACKUP_OR_RESTORE_DIALOG_REQUEST_CODE), "backup_restore").commit();
+                break;
 
         }
 
@@ -115,6 +120,26 @@ public class MainActivity extends AppCompatActivity
         assert drawer != null;
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void launchBackupRestoreService(int which, String filePath) {
+        String action;
+        Intent intent = new Intent(this, BackupRestoreIntentService.class);
+        switch (which) {
+            case 0:
+                action = Constants.SERVICE_INTENT_ACTION_BACKUP;
+                break;
+            case 1:
+                action = Constants.SERVICE_INTENT_ACTION_RESTORE;
+                intent.putExtra(Constants.BACKUP_FILE_PATH_EXTRA_KEY, filePath);
+                break;
+            default:
+                action = null;
+        }
+        if (action != null) {
+            intent.setAction(action);
+            startService(intent);
+        }
     }
 
     private void loadPrefsFragment(String prefName) {
@@ -144,6 +169,28 @@ public class MainActivity extends AppCompatActivity
                 break;
         }
 
+    }
+
+    @Override
+    public void onBackupRestoreResult(int which) {
+        switch (which) {
+            case 0:
+                launchBackupRestoreService(which, null);
+                break;
+            case 1:
+                getFragmentManager().beginTransaction().add(MyDialogFragment.newInstance(Constants.RESTORE_FILE_SELECTOR_DIALOG_REQUEST_CODE), "restore_selector").commit();
+                break;
+        }
+    }
+
+    @Override
+    public void onRestoreRequested(String filePath, boolean isConfirmed) {
+        Toast.makeText(MainActivity.this, filePath, Toast.LENGTH_SHORT).show();
+        if (isConfirmed) {
+            launchBackupRestoreService(1, filePath);
+        } else {
+            getFragmentManager().beginTransaction().add(MyDialogFragment.backupRestoreInstance(Constants.RESTORE_FILE_SELECTOR_DIALOG_REQUEST_CODE, true, filePath), "restore_confirm").commit();
+        }
     }
 
     @Override

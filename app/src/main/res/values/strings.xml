@@ -22,4 +22,10 @@
     <string name="app_reboot_required_dialog_message">For this action to take effect it is required to restart %1$s.\n\nPress ok to restart now</string>
     <string name="theme_dialog_title">Choose theme</string>
     <string name="changelog_version_title">ROM version: %1$s</string>
+    <string name="backup_restore_dialog_title">Backup/Restore Rom Control system data</string>
+    <string name="choose_backup_dialog_title">Please choose backup to restore</string>
+    <string name="no_backup_dialog_title">No backup found on this device</string>
+    <string name="no_backup_dialog_message">Would you like to create new backup now?</string>
+    <string name="restore_confirm_dialog_title">Please confirm restore</string>
+    <string name="restore_confirm_message">You have chosen to restore data from the following backup file\n\n%1$s\n\nPlease note! This operation will change your device settings based on the settings stored in this file.\n\nDO NOT PROCEED unless absolutely sure!!!\n\nRom Control will close to allow data restoration. You will be notified via notification when the process is complete. Depending on the amount of your settings this may take some time.\n\nPlease click "Confirm" to proceed or cancel to quit.</string>
 </resources>

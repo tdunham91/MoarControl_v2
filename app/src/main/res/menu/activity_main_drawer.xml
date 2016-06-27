@@ -22,18 +22,23 @@
 
     <item android:title="More options">
         <menu>
-            <item
-                android:id="@+id/about_us"
-                android:icon="@drawable/ic_info"
-                android:title="About us"/>
+
             <item
                 android:id="@+id/themes"
                 android:icon="@drawable/ic_theme"
                 android:title="Set theme"/>
             <item
+                android:id="@+id/backup_restore"
+                android:icon="@drawable/ic_backup_restore"
+                android:title="Backup&amp;Restore"/>
+            <item
                 android:id="@+id/changeLog"
                 android:icon="@drawable/ic_changelog"
                 android:title="Changelog"/>
+            <item
+                android:id="@+id/about_us"
+                android:icon="@drawable/ic_info"
+                android:title="About us"/>
         </menu>
     </item>
 

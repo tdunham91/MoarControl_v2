@@ -7,6 +7,7 @@ import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -21,6 +22,7 @@ import android.widget.Toast;
 
 import com.wubydax.romcontrol.R;
 
+import java.io.File;
 import java.util.Locale;
 
 /*      Created by Roberto Mariani and Anna Berkovitch, 12/06/2016
@@ -37,7 +39,7 @@ import java.util.Locale;
         You should have received a copy of the GNU General Public License
         along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "deprecation"})
 public class MyDialogFragment extends DialogFragment implements View.OnClickListener {
     private int mRequestCode;
     private OnDialogFragmentListener mOnDialogFragmentListener;
@@ -46,6 +48,16 @@ public class MyDialogFragment extends DialogFragment implements View.OnClickList
         MyDialogFragment myDialogFragment = new MyDialogFragment();
         Bundle args = new Bundle();
         args.putInt(Constants.DIALOG_REQUEST_CODE_KEY, requestCode);
+        myDialogFragment.setArguments(args);
+        return myDialogFragment;
+    }
+
+    public static MyDialogFragment backupRestoreInstance(int requestCode, boolean isConfirm, String filePath) {
+        MyDialogFragment myDialogFragment = new MyDialogFragment();
+        Bundle args = new Bundle();
+        args.putInt(Constants.DIALOG_REQUEST_CODE_KEY, requestCode);
+        args.putBoolean(Constants.DIALOG_RESTORE_IS_CONFIRM_REQUIRED, isConfirm);
+        args.putString(Constants.BACKUP_FILE_PATH_EXTRA_KEY, filePath);
         myDialogFragment.setArguments(args);
         return myDialogFragment;
     }
@@ -63,11 +75,96 @@ public class MyDialogFragment extends DialogFragment implements View.OnClickList
                 return getThemeChooserDialog();
             case Constants.CHANGELOG_DIALOG_REQUEST_CODE:
                 return getChangelogDialog();
+            case Constants.BACKUP_OR_RESTORE_DIALOG_REQUEST_CODE:
+                return getBackupRestoreChooserDialog();
+            case Constants.RESTORE_FILE_SELECTOR_DIALOG_REQUEST_CODE:
+                if(!getArguments().getBoolean(Constants.DIALOG_RESTORE_IS_CONFIRM_REQUIRED)) {
+                    return getRestoreFileSelectorDialog();
+                } else {
+                    return getRestoreConfirmDialog(getArguments().getString(Constants.BACKUP_FILE_PATH_EXTRA_KEY));
+                }
             default:
                 return super.onCreateDialog(savedInstanceState);
         }
 
 
+    }
+
+    private Dialog getRestoreConfirmDialog(final String filePath) {
+        return new AlertDialog.Builder(getActivity())
+                .setTitle(R.string.restore_confirm_dialog_title)
+                .setMessage(String.format(Locale.getDefault(), getString(R.string.restore_confirm_message), filePath))
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton("confirm", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if(mOnDialogFragmentListener != null) {
+                            mOnDialogFragmentListener.onRestoreRequested(filePath, true);
+                        }
+                    }
+                })
+                .create();
+    }
+
+    private Dialog getRestoreFileSelectorDialog() {
+        File backupFolder = new File(Constants.BACKUP_FOLDER_PATH);
+        final File[] backupFiles = backupFolder.listFiles();
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        boolean isBackup = backupFolder.exists() && backupFiles.length > 0;
+        if(isBackup) {
+            String[] items = new String[backupFiles.length];
+            for (int i = 0; i < backupFiles.length; i++) {
+                items[i] = backupFiles[i].getName();
+            }
+            builder.setTitle(R.string.choose_backup_dialog_title)
+                    .setSingleChoiceItems(items, 0, null)
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                            if(mOnDialogFragmentListener != null) {
+                                int checked = ((AlertDialog)dialog).getListView().getCheckedItemPosition();
+                                mOnDialogFragmentListener.onRestoreRequested(backupFiles[checked].getAbsolutePath(), false);
+                            }
+                        }
+                    });
+        } else {
+            builder.setTitle(R.string.no_backup_dialog_title)
+                    .setMessage(R.string.no_backup_dialog_message)
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            if(mOnDialogFragmentListener != null) {
+                                mOnDialogFragmentListener.onBackupRestoreResult(0);
+                            }
+                        }
+                    });
+        }
+        return builder.create();
+    }
+
+    private Dialog getBackupRestoreChooserDialog() {
+        String[] singleChoiceItems = getActivity().getResources().getStringArray(R.array.backup_restore_items);
+        Drawable icon = getActivity().getResources().getDrawable(R.drawable.ic_backup_restore);
+        assert icon != null;
+        icon.setTint(getActivity().getResources().getColor(R.color.colorAccent));
+        return new AlertDialog.Builder(getActivity())
+                .setIcon(icon)
+                .setTitle(R.string.backup_restore_dialog_title)
+                .setSingleChoiceItems(singleChoiceItems, 0, null)
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        int checked = ((AlertDialog)dialog).getListView().getCheckedItemPosition();
+                        if(mOnDialogFragmentListener != null) {
+                            mOnDialogFragmentListener.onBackupRestoreResult(checked);
+                        }
+                    }
+                })
+                .create();
     }
 
     private Dialog getChangelogDialog() {
@@ -160,11 +257,7 @@ public class MyDialogFragment extends DialogFragment implements View.OnClickList
         super.onPause();
     }
 
-    public interface OnDialogFragmentListener {
-        void onDialogResult(int requestCode);
 
-        View getDecorView();
-    }
 
     private class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         private Context mContext;
@@ -199,5 +292,12 @@ public class MyDialogFragment extends DialogFragment implements View.OnClickList
                 mTextView = (TextView) itemView.findViewById(R.id.changelogText);
             }
         }
+    }
+
+    public interface OnDialogFragmentListener {
+        void onDialogResult(int requestCode);
+        void onBackupRestoreResult(int which);
+        void onRestoreRequested(String filePath, boolean isConfirmed);
+        View getDecorView();
     }
 }

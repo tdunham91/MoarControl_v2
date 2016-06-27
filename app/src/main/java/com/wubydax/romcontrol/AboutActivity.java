@@ -50,6 +50,7 @@ public class AboutActivity extends AppCompatActivity {
         String[] textItems = getResources().getStringArray(R.array.about_team_names);
         TypedArray typedArray = getResources().obtainTypedArray(R.array.about_team_drawables);
         LinearLayout linearLayout = (LinearLayout) findViewById(R.id.aboutTeamContainer);
+        assert linearLayout != null;
         for (int i = 0; i < textItems.length; i++) {
             View itemView = LayoutInflater.from(this).inflate(R.layout.about_people_item, linearLayout, false);
 
@@ -65,6 +66,7 @@ public class AboutActivity extends AppCompatActivity {
         String[] textItems = getResources().getStringArray(R.array.about_contact_us_text);
         TypedArray typedArray = getResources().obtainTypedArray(R.array.about_contact_us_drawables);
         LinearLayout linearLayout = (LinearLayout) findViewById(R.id.aboutContactUsContainer);
+        assert linearLayout != null;
         for (int i = 0; i < textItems.length; i++) {
             View itemView = LayoutInflater.from(this).inflate(R.layout.about_contact_us_item, linearLayout, false);
 
