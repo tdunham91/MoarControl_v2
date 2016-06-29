@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.preference.Preference;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
@@ -52,13 +53,11 @@ public class UriSelectionPreference extends Preference {
 
 
 
-    private void attemptToSetIcon(String uriString) {
+    public void attemptToSetIcon(String uriString) {
         Uri uri = Uri.parse(uriString);
         if(uri != null) {
-            Drawable drawable = Utils.getIconDrawable(uri);
-            if(drawable != null) {
-                setIcon(drawable);
-            }
+            SetImage setImage = new SetImage();
+            setImage.execute(uri);
         }
     }
 
@@ -73,4 +72,22 @@ public class UriSelectionPreference extends Preference {
     public interface OnUriSelectionRequestedListener {
         void onUriSelectionRequested(String key);
     }
+
+    public class SetImage extends AsyncTask<Uri, Void, Drawable> {
+
+
+
+        @Override
+        protected Drawable doInBackground(Uri... params) {
+            return Utils.getIconDrawable(params[0]);
+        }
+
+        @Override
+        protected void onPostExecute(Drawable drawable) {
+            setIcon(drawable);
+        }
+
+
+    }
+
 }

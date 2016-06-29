@@ -1,19 +1,13 @@
 package com.wubydax.romcontrol.prefs;
 
-import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.util.TypedValue;
-import android.widget.Button;
 
 import com.wubydax.romcontrol.R;
 import com.wubydax.romcontrol.utils.Utils;
@@ -32,10 +26,8 @@ import com.wubydax.romcontrol.utils.Utils;
         You should have received a copy of the GNU General Public License
         along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 public class MyEditTextPreference extends EditTextPreference implements Preference.OnPreferenceChangeListener {
-    private static final String LOG_TAG = MyEditTextPreference.class.getName();
     private final boolean mIsSilent;
     private final String mPackageToKill;
-    String mValue;
     private ContentResolver mContentResolver;
 
     public MyEditTextPreference(Context context, AttributeSet attrs) {
@@ -53,11 +45,8 @@ public class MyEditTextPreference extends EditTextPreference implements Preferen
     protected void onSetInitialValue(boolean restoreValue, Object defaultValue) {
         super.onSetInitialValue(restoreValue, defaultValue);
         String value = "";
-        Log.d(LOG_TAG, "onSetInitialValue is called");
-        Log.d(LOG_TAG, "onSetInitialValue persisted string at the beginning is " + getPersistedString(null));
-        Log.d(LOG_TAG, "onSetInitialValue restoreValue is " + restoreValue);
+
         if (!restoreValue && defaultValue != null) {
-            Log.d(LOG_TAG, "onSetInitialValue restore value is false condition triggered and default value is not null");
             String dbValue = Settings.System.getString(mContentResolver, getKey());
             if (dbValue != null && !dbValue.equals(defaultValue)) {
                 value = dbValue;
@@ -69,34 +58,33 @@ public class MyEditTextPreference extends EditTextPreference implements Preferen
             value = getPersistedString(null);
         }
         setSummary(value);
-        mValue = value;
 
-        Log.d(LOG_TAG, "onSetInitialValue persisted string at the end is " + getPersistedString(null));
     }
 
     @Override
     public String getText() {
         String value = Settings.System.getString(mContentResolver, getKey());
         String persistedString = getPersistedString(null);
-        if (value.equals(persistedString)) {
-            return persistedString;
+        if (value != null) {
+            if (value.equals(persistedString)) {
+                return persistedString;
+            } else {
+                persistString(value);
+                return value;
+            }
         } else {
-            persistString(value);
-            return value;
+            return persistedString;
         }
     }
 
     @Override
     protected void onAttachedToHierarchy(PreferenceManager preferenceManager) {
         super.onAttachedToHierarchy(preferenceManager);
-        Log.d(LOG_TAG, "onAttachedToHierarchy is called");
-        Log.d(LOG_TAG, "onAttachedToHierarchy persisted string is " + getPersistedString(null));
         String value = Settings.System.getString(mContentResolver, getKey());
         String persistedString = getPersistedString(null);
         if (value != null && !value.equals(persistedString)) {
             persistString(value);
             setSummary(value);
-            mValue = value;
         }
     }
 

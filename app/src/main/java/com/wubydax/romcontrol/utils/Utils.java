@@ -136,7 +136,8 @@ public class Utils {
             try {
                 InputStream inputStream = Constants.CONTEXT.getContentResolver().openInputStream(uri);
                 Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-                drawable = new BitmapDrawable(Constants.CONTEXT.getResources(), bitmap);
+                Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth()/5, bitmap.getHeight()/5, false);
+                drawable = new BitmapDrawable(Constants.CONTEXT.getResources(), scaledBitmap);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }

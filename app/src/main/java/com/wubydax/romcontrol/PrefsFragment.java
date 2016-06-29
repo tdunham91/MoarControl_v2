@@ -83,12 +83,10 @@ public class PrefsFragment extends PreferenceFragment implements Preference.OnPr
         }
         switch (requestCode) {
             case 46:
-                Drawable drawable = Utils.getIconDrawable(data.getData());
                 Settings.System.putString(mContext.getContentResolver(), mUriPreferenceKey, data.getData().toString());
-                if(drawable != null) {
                     mSharedPreferences.edit().putString(mUriPreferenceKey, data.getData().toString()).apply();
-                    findPreference(mUriPreferenceKey).setIcon(drawable);
-                }
+                ((UriSelectionPreference) findPreference(mUriPreferenceKey)).attemptToSetIcon(data.getData().toString());
+
                 break;
             default:
                 super.onActivityResult(requestCode, resultCode, data);
