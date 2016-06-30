@@ -44,5 +44,6 @@ public class Constants {
     public static final String BACKUP_FILE_PATH_EXTRA_KEY = "file_path";
     public static final String DIALOG_RESTORE_IS_CONFIRM_REQUIRED = "is_confirm";
 
+    public static final String CURRENT_FRAGMENT = "last_fragment_used";
 }
 

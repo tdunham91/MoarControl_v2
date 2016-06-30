@@ -60,6 +60,7 @@ public class PrefsFragment extends PreferenceFragment implements Preference.OnPr
             getPreferenceManager().setSharedPreferencesName(prefName);
             addPreferencesFromResource(prefId);
             mSharedPreferences = getPreferenceManager().getSharedPreferences();
+            PreferenceManager.getDefaultSharedPreferences(getActivity()).edit().putString(Constants.CURRENT_FRAGMENT, prefName).apply();
             iteratePrefs(getPreferenceScreen());
         }
     }

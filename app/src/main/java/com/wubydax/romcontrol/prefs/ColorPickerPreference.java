@@ -57,7 +57,7 @@ public class ColorPickerPreference
     private final boolean mIsSilent;
     View mView;
     ColorPickerDialog mDialog;
-    private int mValue = Color.BLACK;
+    private int mValue = Color.WHITE;
     private float mDensity = 0;
     private boolean mAlphaSliderEnabled;
     private boolean mHexValueEnabled;
@@ -154,11 +154,10 @@ public class ColorPickerPreference
             if (mHexDefaultValue != null && mHexDefaultValue.startsWith("#")) {
                 colorInt = convertToColorInt(mHexDefaultValue);
             } else {
-                colorInt = a.getColor(index, Color.BLACK);
+                colorInt = a.getColor(index, Color.WHITE);
             }
 
         }
-        persistInt(colorInt);
         return colorInt;
     }
 
@@ -256,7 +255,6 @@ public class ColorPickerPreference
     public void onColorChanged(int color) {
         persistInt(color);
         Settings.System.putInt(getContext().getContentResolver(), getKey(), color);
-
         mValue = color;
         setPreviewColor();
         try {

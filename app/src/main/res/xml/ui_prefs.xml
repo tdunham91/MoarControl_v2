@@ -19,44 +19,50 @@
             android:key="test_checkbox"
             android:summaryOff="Disabled"
             android:summaryOn="Enabled"
-            android:title="Test Checkbox"
-            />
+            android:title="Test Checkbox"/>
         <com.wubydax.romcontrol.prefs.MySeekBarPreference
             android:defaultValue="50"
+            android:dependency="test_checkbox"
             android:key="test_seekbar_key"
             android:title="Test Seek Bar"
             wubydax:maxValue="100"
             wubydax:minValue="58"
-            wubydax:unitsValue="%"
-            android:dependency="test_checkbox"/>
+            wubydax:unitsValue="%"/>
+        <com.wubydax.romcontrol.prefs.MySeekBarPreference
+            android:defaultValue="58"
+            android:dependency="test_checkbox"
+            android:key="test_seekbar_key2"
+            android:title="Test Seek Bar"
+            wubydax:maxValue="255"
+            wubydax:minValue="0"/>
 
         <com.wubydax.romcontrol.prefs.ThumbnailListPreference
+            android:defaultValue="1"
+            android:dependency="test_checkbox"
+            android:key="test_thumbnail_key"
             android:title="Thumbnail preference"
             wubydax:drawableArray="@array/thumbnail_drawables"
-            android:defaultValue="1"
             wubydax:entryList="@array/thumbnail_items"
-            wubydax:entryValuesList="@array/thumbnail_values"
-            android:dependency="test_checkbox"
-            android:key="test_thumbnail_key"/>
+            wubydax:entryValuesList="@array/thumbnail_values"/>
         <com.wubydax.romcontrol.prefs.ThumbnailListPreference
+            android:defaultValue="2"
+            android:dependency="test_checkbox"
+            android:key="test_thumbnail_key2"
             android:title="Thumbnail preference 2"
             wubydax:drawableArray="@array/thumbnail_drawables"
-            android:defaultValue="2"
             wubydax:entryList="@array/thumbnail_items"
-            wubydax:entryValuesList="@array/thumbnail_values"
-            android:dependency="test_checkbox"
-            android:key="test_thumbnail_key2"/>
+            wubydax:entryValuesList="@array/thumbnail_values"/>
 
         <com.wubydax.romcontrol.prefs.IntentDialogPreference
+            android:dependency="test_checkbox"
             android:key="test_intent"
             android:title="Select Test App"
             wubydax:intentSeparator="/"
-            wubydax:showSearch="true"
-            android:dependency="test_checkbox"/>
+            wubydax:showSearch="true"/>
         <com.wubydax.romcontrol.prefs.UriSelectionPreference
+            android:dependency="test_checkbox"
             android:key="test_image_selection_key_2"
-            android:title="Select Image 2"
-            android:dependency="test_checkbox"/>
+            android:title="Select Image 2"/>
         <com.wubydax.romcontrol.prefs.UriSelectionPreference
             android:key="test_image_selection_key"
             android:title="Select Image"/>
@@ -69,16 +75,16 @@
             android:title="Select Image 4"/>
         <com.wubydax.romcontrol.prefs.MyListPreference
             android:defaultValue="20"
+            android:dependency="test_checkbox"
             android:entries="@array/test_list_entries"
             android:entryValues="@array/test_list_values"
             android:key="test_list_key"
-            android:title="Test List Preference"
-            android:dependency="test_checkbox"/>
+            android:title="Test List Preference"/>
         <com.wubydax.romcontrol.prefs.MyEditTextPreference
             android:defaultValue="test"
+            android:dependency="test_checkbox"
             android:key="test_edit_text_key1"
-            android:title="Some edit text"
-            android:dependency="test_checkbox"/>
+            android:title="Some edit text"/>
         <PreferenceScreen
             android:key="open_reboot"
             android:title="Open reboot service"/>
@@ -86,11 +92,11 @@
     <PreferenceCategory
         android:title="File preferences">
         <com.wubydax.romcontrol.prefs.FilePreference
+            android:dependency="test_checkbox"
             android:key="new_file"
             android:summaryOff="Disabled"
             android:summaryOn="Enabled"
-            android:title="New file preference"
-            android:dependency="test_checkbox"/>
+            android:title="New file preference"/>
         <com.wubydax.romcontrol.prefs.FilePreference
             android:key="another_file"
             android:summaryOff="Disabled"
@@ -100,8 +106,8 @@
     <PreferenceCategory
         android:title="Useful Apps">
         <com.wubydax.romcontrol.prefs.OpenAppPreference
-            wubydax:componentName="com.wubydax.geartwswipe/com.wubydax.geartwswipe.ResetDialogActivity"
-            android:dependency="test_checkbox"/>
+            android:dependency="test_checkbox"
+            wubydax:componentName="com.wubydax.geartwswipe/com.wubydax.geartwswipe.ResetDialogActivity"/>
         <com.wubydax.romcontrol.prefs.OpenAppPreference
             wubydax:componentName="com.speedsoftware.rootexplorer/com.speedsoftware.rootexplorer.RootExplorer"/>
         <com.wubydax.romcontrol.prefs.OpenAppPreference
@@ -123,9 +129,9 @@
             android:title="Second Test Switch"/>
         <com.wubydax.romcontrol.prefs.ColorPickerPreference
             android:defaultValue="#ffccdd"
+            android:dependency="second_test_switch"
             android:key="second_test_color"
-            android:title="Second Test Color"
-            android:dependency="second_test_switch"/>
+            android:title="Second Test Color"/>
         <PreferenceScreen
             android:title="Sub Screen Preferences">
             <PreferenceCategory

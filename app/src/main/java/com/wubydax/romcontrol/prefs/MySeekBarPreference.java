@@ -59,13 +59,7 @@ public class MySeekBarPreference extends Preference implements SeekBar.OnSeekBar
 
     @Override
     protected Object onGetDefaultValue(TypedArray a, int index) {
-        int value = mDefaultValue;
-        try {
-            value = Settings.System.getInt(getContext().getContentResolver(), getKey());
-        } catch (Settings.SettingNotFoundException e) {
-            value = a.getInt(index, value);
-        }
-        return value;
+        return a.getInt(index, mDefaultValue);
     }
 
     @Override
@@ -73,9 +67,9 @@ public class MySeekBarPreference extends Preference implements SeekBar.OnSeekBar
         int value;
         try {
             value = Settings.System.getInt(mContentResolver, getKey());
-
         } catch (Settings.SettingNotFoundException e) {
             value = !restorePersistedValue && defaultValue != null ? (int) defaultValue : getPersistedInt(mDefaultValue);
+            Settings.System.putInt(getContext().getContentResolver(), getKey(), value);
         }
         persistInt(value);
     }

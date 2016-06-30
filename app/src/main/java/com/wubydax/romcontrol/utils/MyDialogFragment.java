@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -228,20 +229,19 @@ public class MyDialogFragment extends DialogFragment implements View.OnClickList
     @Override
     public void onClick(View v) {
         int id = v.getId();
-        String message = "protective layer clicked";
+        PowerManager powerManager = (PowerManager) Constants.CONTEXT.getSystemService(Context.POWER_SERVICE);
         switch (id) {
             case R.id.rebootDevice:
-                message = "reboot device clicked";
+                powerManager.reboot(null);
                 break;
             case R.id.rebootRecovery:
-                message = "reboot recovery clicked";
+                powerManager.reboot("recovery");
                 break;
             case R.id.rebootUI:
-                message = "reboot ui clicked";
+
                 break;
 
         }
-        Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
         getDialog().dismiss();
     }
 

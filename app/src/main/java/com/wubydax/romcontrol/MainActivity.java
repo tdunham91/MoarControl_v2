@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity
         mFragmentManager = getFragmentManager();
         initViews();
         if (savedInstanceState == null) {
-            loadPrefsFragment("ui_prefs");
+            loadPrefsFragment(PreferenceManager.getDefaultSharedPreferences(this).getString(Constants.CURRENT_FRAGMENT, "ui_prefs"));
         }
         SuTask suTask = new SuTask();
         suTask.setOnSuCompletedListener(this);
@@ -101,6 +101,9 @@ public class MainActivity extends AppCompatActivity
 
             case R.id.sys_ui_prefs:
                 loadPrefsFragment("ui_prefs");
+                break;
+            case R.id.phone_prefs:
+                loadPrefsFragment("phone_prefs");
                 break;
             case R.id.themes:
                 mFragmentManager.beginTransaction().add(MyDialogFragment.newInstance(Constants.THEME_DIALOG_REQUEST_CODE), "theme_dialog").commit();
