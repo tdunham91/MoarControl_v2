@@ -59,8 +59,8 @@ public class ColorPickerPreference
     ColorPickerDialog mDialog;
     private int mValue = Color.BLACK;
     private float mDensity = 0;
-    private boolean mAlphaSliderEnabled = false;
-    private boolean mHexValueEnabled = false;
+    private boolean mAlphaSliderEnabled;
+    private boolean mHexValueEnabled;
 
 
     public ColorPickerPreference(Context context, AttributeSet attrs) {
@@ -178,8 +178,8 @@ public class ColorPickerPreference
         mDensity = getContext().getResources().getDisplayMetrics().density;
         setOnPreferenceClickListener(this);
         if (attrs != null) {
-            mAlphaSliderEnabled = attrs.getAttributeBooleanValue(null, "alphaSlider", false);
-            mHexValueEnabled = attrs.getAttributeBooleanValue(null, "hexValue", false);
+            mAlphaSliderEnabled = attrs.getAttributeBooleanValue(null, "alphaSlider", true);
+            mHexValueEnabled = attrs.getAttributeBooleanValue(null, "hexValue", true);
 
         }
     }

@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
@@ -105,7 +106,6 @@ public class BackupRestoreIntentService extends IntentService {
         for (File file : allPrefFilesList) {
             if (!file.getName().contains(getPackageName() + "_preferences")) {
                 String prefName = file.getName().substring(0, file.getName().length() - 4);
-                Log.d(LOG_TAG, "iteratePrefsAndBackup file name is " + file.getName().substring(0, file.getName().length() - 4));
                 SharedPreferences sharedPreferences = getSharedPreferences(prefName, MODE_PRIVATE);
                 Map<String, ?> prefMap = sharedPreferences.getAll();
                 for (Map.Entry<String, ?> singlePref : prefMap.entrySet()) {
@@ -127,7 +127,6 @@ public class BackupRestoreIntentService extends IntentService {
                 }
             }
         }
-        Log.d(LOG_TAG, "iteratePrefsAndBackup backup is " + stringBuilder.toString());
         makeBackup(stringBuilder.toString());
     }
 

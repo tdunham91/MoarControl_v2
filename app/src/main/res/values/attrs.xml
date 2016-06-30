@@ -4,7 +4,6 @@
         <attr name="drawableArray" format="reference"/>
         <attr name="entryList" format="reference"/>
         <attr name="entryValuesList" format="reference"/>
-        <attr name="entryDefault" format="string"/>
     </declare-styleable>
     <declare-styleable name="MyPreference">
         <attr name="packageNameToKill" format="string"/>

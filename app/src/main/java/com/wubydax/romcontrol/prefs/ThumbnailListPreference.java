@@ -2,14 +2,14 @@ package com.wubydax.romcontrol.prefs;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.DialogPreference;
 import android.preference.Preference;
+import android.provider.Settings;
 import android.util.AttributeSet;
-import android.util.TypedValue;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,38 +22,53 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 
 import com.wubydax.romcontrol.R;
+import com.wubydax.romcontrol.utils.Utils;
 
 import java.util.Arrays;
 
-/**
- * Created by Anna Berkovitch on 28/10/2015.
- */
+/*      Created by Roberto Mariani and Anna Berkovitch, 30/06/2016
+        This program is free software: you can redistribute it and/or modify
+        it under the terms of the GNU General Public License as published by
+        the Free Software Foundation, either version 3 of the License, or
+        (at your option) any later version.
+
+        This program is distributed in the hope that it will be useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        GNU General Public License for more details.
+
+        You should have received a copy of the GNU General Public License
+        along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
+
+@SuppressWarnings("unused")
 public class ThumbnailListPreference extends DialogPreference implements AdapterView.OnItemClickListener, Preference.OnPreferenceChangeListener {
-    private Context c;
-    private Drawable[] thumbnailsArray;
-    private Drawable thumbnailIcon;
-    private CharSequence[] entriesList, entryValuesList;
-    private String LOG_TAG = "ThumbnailPreference", entryDefault;
-    private ImageView iconView;
-    private int selectedPosition;
+    private final String mPackageToKill;
+    private final boolean mIsSilent;
+    private Context mContext;
+    private Drawable[] mThumbnailsArray;
+    private CharSequence[] mEntriesList, mEntryValuesList;
+    private ImageView mIconView;
+    private int mSelectedPosition;
 
 
     public ThumbnailListPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
-        c = context;
-        TypedArray taStyled = c.obtainStyledAttributes(attrs, R.styleable.ThumbnailListPreference, 0, 0);
-        entriesList = taStyled.getTextArray(R.styleable.ThumbnailListPreference_entryList);
-        entryValuesList = taStyled.getTextArray(R.styleable.ThumbnailListPreference_entryValuesList);
-        entryDefault = taStyled.getString(R.styleable.ThumbnailListPreference_entryDefault);
-        int resId = taStyled.getResourceId(R.styleable.ThumbnailListPreference_drawableArray, 0);
+        mContext = context;
+        TypedArray typedArray = mContext.obtainStyledAttributes(attrs, R.styleable.ThumbnailListPreference, 0, 0);
+        mEntriesList = typedArray.getTextArray(R.styleable.ThumbnailListPreference_entryList);
+        mEntryValuesList = typedArray.getTextArray(R.styleable.ThumbnailListPreference_entryValuesList);
+        mPackageToKill = typedArray.getString(R.styleable.MyPreference_packageNameToKill);
+        mIsSilent = typedArray.getBoolean(R.styleable.MyPreference_isSilent, true);
+        int resId = typedArray.getResourceId(R.styleable.ThumbnailListPreference_drawableArray, 0);
         if (resId != 0) {
-            TypedArray taRes = c.getResources().obtainTypedArray(resId);
-            thumbnailsArray = new Drawable[taRes.length()];
-            for (int i = 0; i < taRes.length(); i++) {
-                thumbnailsArray[i] = taRes.getDrawable(i);
+            TypedArray resourceArray = mContext.getResources().obtainTypedArray(resId);
+            mThumbnailsArray = new Drawable[resourceArray.length()];
+            for (int i = 0; i < resourceArray.length(); i++) {
+                mThumbnailsArray[i] = resourceArray.getDrawable(i);
             }
+            resourceArray.recycle();
         }
-        taStyled.recycle();
+        typedArray.recycle();
 
         setDialogLayoutResource(R.layout.thumbnail_preference_dialog_view);
         setWidgetLayoutResource(R.layout.thumbnail_preference_icon);
@@ -61,20 +76,35 @@ public class ThumbnailListPreference extends DialogPreference implements Adapter
     }
 
     @Override
+    protected Object onGetDefaultValue(TypedArray a, int index) {
+        return a.getString(index);
+    }
+
+    @Override
+    protected void onSetInitialValue(boolean restorePersistedValue, Object defaultValue) {
+        String value = Settings.System.getString(mContext.getContentResolver(), getKey());
+        if (value == null) {
+            value = defaultValue != null ? (String) defaultValue : "1";
+            Settings.System.putString(mContext.getContentResolver(), getKey(), value);
+        }
+        persistString(value);
+    }
+
+    @Override
     protected void onBindView(View view) {
         super.onBindView(view);
-        if(entryDefault!=null && getPersistedString(null) ==null){
-            persistString(entryDefault);
+        mSelectedPosition = Arrays.asList(mEntryValuesList).indexOf(getPersistedString("1"));
+        if (mSelectedPosition == -1) {
+            mSelectedPosition = 0;
         }
-        getThumbnailIcon();
-        iconView = (ImageView) view.findViewById(R.id.thumbnailIcon);
-        iconView.setImageDrawable(thumbnailIcon);
+        mIconView = (ImageView) view.findViewById(R.id.thumbnailIcon);
+        mIconView.setImageDrawable(mThumbnailsArray[mSelectedPosition]);
     }
 
     @Override
     protected void onBindDialogView(View view) {
         super.onBindDialogView(view);
-        selectedPosition = Arrays.asList(entryValuesList).indexOf(getPersistedString("0"));
+
         ListView lv = (ListView) view.findViewById(R.id.thumbnailListView);
         lv.setOnItemClickListener(this);
         lv.setFastScrollEnabled(true);
@@ -82,86 +112,61 @@ public class ThumbnailListPreference extends DialogPreference implements Adapter
         lv.setDivider(null);
         lv.setDividerHeight(0);
         lv.setScrollingCacheEnabled(false);
-        ListAdapter adapter = new ListAdapter(c, entriesList, entryValuesList, thumbnailsArray, selectedPosition);
+        ListAdapter adapter = new ListAdapter(mContext, mEntriesList, mEntryValuesList, mThumbnailsArray, mSelectedPosition);
         lv.setAdapter(adapter);
     }
 
     @Override
     protected void showDialog(Bundle state) {
         super.showDialog(state);
-        TypedValue typedValue = new TypedValue();
-        Resources.Theme theme = getContext().getTheme();
-        theme.resolveAttribute(R.attr.colorAccent, typedValue, true);
         AlertDialog dialog = (AlertDialog) getDialog();
         dialog.show();
-        Button cancel = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
         Button ok = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
         ok.setVisibility(View.GONE);
-        cancel.setTextColor(typedValue.data);
-        dialog.getWindow().setBackgroundDrawableResource(R.drawable.dialog_bg);
     }
 
-    @Override
-    protected Object onGetDefaultValue(TypedArray a, int index) {
-        if(entryDefault!=null) {
-            return entryDefault;
-        }else{
-            return null;
-        }
+
+    public CharSequence[] getEntries() {
+        return mEntriesList;
     }
 
-    public CharSequence[] getEntries(){
-        return entriesList;
+    public void setEntries(CharSequence[] entries) {
+        mEntriesList = entries;
     }
 
-    public CharSequence[] getEntryValues(){
-        return entryValuesList;
+    public CharSequence[] getEntryValues() {
+        return mEntryValuesList;
     }
 
-    public String getDefaultEntry(){
-        return entryDefault;
+    public void setEntryValues(CharSequence[] entryValues) {
+        mEntryValuesList = entryValues;
     }
 
-    public Drawable[] getDrawableArray(){
-        return thumbnailsArray;
+    public Drawable[] getDrawableArray() {
+        return mThumbnailsArray;
     }
 
-    public void setEntries(CharSequence[] entries){
-        entriesList = entries;
-    }
-
-    public void setEntryValues(CharSequence[] entryValues){
-        entryValuesList = entryValues;
-    }
-
-    public void setDrawableArray(Drawable[] drawableArray){
-        thumbnailsArray = drawableArray;
-    }
-
-    public void setEntryDefault(String defaultEntry){
-        entryDefault = defaultEntry;
-    }
-
-    public Drawable getThumbnailIcon() {
-        String value = getPersistedString(null);
-        int index = Arrays.asList(entryValuesList).indexOf(value);
-        if (value != null) {
-            thumbnailIcon = thumbnailsArray[index];
-
-        } else {
-            thumbnailIcon = null;
-        }
-        return thumbnailIcon;
+    public void setDrawableArray(Drawable[] drawableArray) {
+        mThumbnailsArray = drawableArray;
     }
 
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        persistString(entryValuesList[i].toString());
-        thumbnailIcon = thumbnailsArray[i];
-        selectedPosition = i;
+        persistString(mEntryValuesList[i].toString());
+        Settings.System.putString(mContext.getContentResolver(), getKey(), mEntryValuesList[i].toString());
+        mSelectedPosition = i;
         getDialog().dismiss();
-        iconView.setImageDrawable(thumbnailIcon);
+        mIconView.setImageDrawable(mThumbnailsArray[i]);
+        if (mPackageToKill != null) {
+            if (getContext().getPackageManager().getLaunchIntentForPackage(mPackageToKill) != null) {
+                if (mIsSilent) {
+                    Utils.killPackage(mPackageToKill);
+                } else {
+                    Utils.showKillPackageDialog(mPackageToKill, getContext());
+                }
+            }
+        }
 
     }
 
@@ -172,23 +177,23 @@ public class ThumbnailListPreference extends DialogPreference implements Adapter
 
     private static class ListAdapter extends BaseAdapter {
         Context c;
-        CharSequence[] entries, values;
-        Drawable[] thumbnails;
-        int selectedPosition;
+        CharSequence[] mEntries, mValues;
+        Drawable[] mThumbnails;
+        int mSelectedPosition;
 
         public ListAdapter(Context context, CharSequence[] entries, CharSequence[] values, Drawable[] thumbnails, int selectedPosition) {
             c = context;
-            this.entries = entries;
-            this.values = values;
-            this.thumbnails = thumbnails;
-            this.selectedPosition = selectedPosition;
+            this.mEntries = entries;
+            this.mValues = values;
+            this.mThumbnails = thumbnails;
+            this.mSelectedPosition = selectedPosition;
 
         }
 
         @Override
         public int getCount() {
-            if (entries != null) {
-                return entries.length;
+            if (mEntries != null) {
+                return mEntries.length;
             } else {
                 return 0;
             }
@@ -204,18 +209,6 @@ public class ThumbnailListPreference extends DialogPreference implements Adapter
             return 0;
         }
 
-        private class ViewHolder {
-            RadioButton rb;
-            TextView tv;
-            ImageView iv;
-
-            public ViewHolder(View v) {
-                rb = (RadioButton) v.findViewById(R.id.thumbnailRadioButton);
-                tv = (TextView) v.findViewById(R.id.thumbnailText);
-                iv = (ImageView) v.findViewById(R.id.thumbnailImage);
-            }
-        }
-
         @Override
         public View getView(int i, View view, ViewGroup viewGroup) {
             ViewHolder vh;
@@ -229,10 +222,22 @@ public class ThumbnailListPreference extends DialogPreference implements Adapter
                 vh = (ViewHolder) view.getTag();
 
             }
-            vh.tv.setText(entries[i]);
-            vh.iv.setImageDrawable(thumbnails[i]);
-            vh.rb.setChecked(i==selectedPosition);
+            vh.mTextView.setText(mEntries[i]);
+            vh.mImageView.setImageDrawable(mThumbnails[i]);
+            vh.mRadioButton.setChecked(i == mSelectedPosition);
             return view;
+        }
+
+        private class ViewHolder {
+            RadioButton mRadioButton;
+            TextView mTextView;
+            ImageView mImageView;
+
+            public ViewHolder(View v) {
+                mRadioButton = (RadioButton) v.findViewById(R.id.thumbnailRadioButton);
+                mTextView = (TextView) v.findViewById(R.id.thumbnailText);
+                mImageView = (ImageView) v.findViewById(R.id.thumbnailImage);
+            }
         }
     }
 }
