@@ -1,5 +1,6 @@
 package com.wubydax.romcontrol;
 
+import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
 
@@ -7,8 +8,13 @@ import android.content.Context;
  * Created by Anna Berkovitch on 11/06/2016.
  * Application object for context and gc uses
  */
-public class MyApplication extends Application {
+public class MyApp extends Application {
+    @SuppressLint("StaticFieldLeak")
     private static Context mContext;
+
+    public static Context getContext() {
+        return mContext;
+    }
 
     @Override
     public void onCreate() {
@@ -20,9 +26,5 @@ public class MyApplication extends Application {
     public void onLowMemory() {
         Runtime.getRuntime().gc();
         super.onLowMemory();
-    }
-
-    public static Context getContext() {
-        return mContext;
     }
 }

@@ -5,13 +5,14 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
     android:layout_marginTop="10dp"
-    android:layout_marginBottom="10dp">
+    android:layout_marginBottom="10dp"
+    android:onClick="onClick">
 
     <de.hdodenhof.circleimageview.CircleImageView
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/contactUsImage"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:src="@drawable/icon_2"
         app:civ_border_width="0dp"
         android:elevation="4dp"
@@ -24,7 +25,6 @@
         android:layout_below="@id/contactUsImage"
         android:gravity="center"
         android:layout_centerHorizontal="true"
-        android:text="Facebook"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="?android:attr/textColorPrimary"
         android:id="@+id/contactUsText"/>

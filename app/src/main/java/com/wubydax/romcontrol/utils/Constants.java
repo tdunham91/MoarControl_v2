@@ -1,9 +1,8 @@
 package com.wubydax.romcontrol.utils;
 
-import android.content.Context;
 import android.os.Environment;
 
-import com.wubydax.romcontrol.MyApplication;
+import com.wubydax.romcontrol.MyApp;
 
 import java.io.File;
 
@@ -21,8 +20,23 @@ import java.io.File;
         You should have received a copy of the GNU General Public License
         along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 public class Constants {
-    public static final Context CONTEXT = MyApplication.getContext();
 
+
+    static final String BACKUP_FOLDER_PATH = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "RomControl" + File.separator + "Backups";
+    static final String DIALOG_REQUEST_CODE_KEY = "dialog_request_code";
+    static final String DIALOG_RESTORE_IS_CONFIRM_REQUIRED = "is_confirm";
+    static final String SCRIPTS_FOLDER = "scripts";
+    static final String SHARED_PREFS_FOLDER_PATH = MyApp.getContext().getFilesDir().getParent() + File.separator + "shared_prefs";
+
+
+    public static final String BACKUP_FILE_PATH_EXTRA_KEY = "file_path";
+    public static final String FILES_SCRIPTS_FOLDER_PATH = MyApp.getContext().getFilesDir().getPath() + File.separator + SCRIPTS_FOLDER;
+    public static final String LAST_FRAGMENT = "last_fragment_used";
+    public static final String LAST_TITLE = "last_activity_title";
+    public static final String PREF_NAME_KEY = "pref_key";
+    public static final String SERVICE_INTENT_ACTION_BACKUP = "com.wubydax.action.BACKUP";
+    public static final String SERVICE_INTENT_ACTION_RESTORE = "com.wubydax.action.RESTORE";
+    public static final String THEME_PREF_KEY = "theme_pref";
 
     public static final int BACKUP_OR_RESTORE_DIALOG_REQUEST_CODE = 26;
     public static final int CHANGELOG_DIALOG_REQUEST_CODE = 25;
@@ -31,19 +45,5 @@ public class Constants {
     public static final int RESTORE_FILE_SELECTOR_DIALOG_REQUEST_CODE = 65;
     public static final int THEME_DIALOG_REQUEST_CODE = 29;
 
-
-    public static final String DIALOG_REQUEST_CODE_KEY = "dialog_request_code";
-    public static final String PREF_NAME_KEY = "pref_key";
-    public static final String SCRIPTS_FOLDER = "scripts";
-    public static final String FILES_SCRIPTS_FOLDER_PATH = CONTEXT.getFilesDir().getPath() + File.separator + SCRIPTS_FOLDER;
-    public static final String THEME_PREF_KEY = "theme_pref";
-    public static final String SERVICE_INTENT_ACTION_BACKUP = "com.wubydax.action.BACKUP";
-    public static final String SERVICE_INTENT_ACTION_RESTORE = "com.wubydax.action.RESTORE";
-    public static final String BACKUP_FOLDER_PATH = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "RomControl" + File.separator + "Backups";
-    public static final String SHARED_PREFS_FOLDER_PATH = CONTEXT.getFilesDir().getParent() + File.separator + "shared_prefs";
-    public static final String BACKUP_FILE_PATH_EXTRA_KEY = "file_path";
-    public static final String DIALOG_RESTORE_IS_CONFIRM_REQUIRED = "is_confirm";
-
-    public static final String CURRENT_FRAGMENT = "last_fragment_used";
 }
 

@@ -9,10 +9,8 @@ import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.preference.Preference;
 import android.util.AttributeSet;
-import android.view.View;
-import android.view.ViewGroup;
 
-import com.wubydax.romcontrol.utils.Constants;
+import com.wubydax.romcontrol.MyApp;
 import com.wubydax.romcontrol.R;
 
 /*      Created by Roberto Mariani and Anna Berkovitch, 12/06/2016
@@ -37,7 +35,7 @@ public class OpenAppPreference extends Preference {
 
     public OpenAppPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mContext = Constants.CONTEXT;
+        mContext = MyApp.getContext();
         TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.OpenAppPreference);
         String componentName = typedArray.getString(R.styleable.OpenAppPreference_componentName);
         initPreference(componentName);

@@ -8,12 +8,12 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.wubydax.romcontrol.MainActivity;
+import com.wubydax.romcontrol.MyApp;
 import com.wubydax.romcontrol.R;
 
 import java.io.BufferedOutputStream;
@@ -63,39 +63,49 @@ public class BackupRestoreIntentService extends IntentService {
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     private void restoreValues(String filePath) {
+        File filesFolder = new File(getFilesDir().getAbsolutePath());
+        File[] filesInData = filesFolder.listFiles();
+        if (filesInData.length > 0) {
+            for (File file : filesInData) {
+                String fileName = file.getName();
+                if (!fileName.equals("scripts") && !fileName.contains("rList")) {
+                    file.delete();
+                }
+            }
+        }
         FileInputStream fileInputStream;
         BufferedReader bufferedReader;
         File backUpFile = new File(filePath);
-            try {
-                fileInputStream = new FileInputStream(backUpFile);
-                bufferedReader = new BufferedReader(new InputStreamReader(fileInputStream));
-                String line;
-                while ((line=bufferedReader.readLine())!=null) {
-                    if(!line.equals("")) {
-                        if(line.contains("###")){
-                            String[] data = line.split("###");
-                            Settings.System.putString(getContentResolver(), data[0], data[1]);
-                        } else {
-                            File file = new File(getFilesDir() + File.separator + line);
-                            try {
-                                file.createNewFile();
-                                BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(file), 16 * 1024);
-                                bufferedOutputStream.close();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
+        try {
+            fileInputStream = new FileInputStream(backUpFile);
+            bufferedReader = new BufferedReader(new InputStreamReader(fileInputStream));
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                if (!line.equals("")) {
+                    if (line.contains("###")) {
+                        String[] data = line.split("###");
+                        Settings.System.putString(getContentResolver(), data[0], data[1]);
+                    } else {
+                        File file = new File(getFilesDir() + File.separator + line);
+                        try {
+                            file.createNewFile();
+                            BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(file), 16 * 1024);
+                            bufferedOutputStream.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
                         }
-
                     }
-                    Log.d(LOG_TAG, "restoreValues " + line);
+
                 }
-                fileInputStream.close();
-                bufferedReader.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                sendBroadcast(new Intent(LocalReceiver.RESTORE_COMPLETE_ACTION));
+                Log.d(LOG_TAG, "restoreValues " + line);
             }
+            fileInputStream.close();
+            bufferedReader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            sendBroadcast(new Intent(LocalReceiver.RESTORE_COMPLETE_ACTION));
+        }
 
     }
 
@@ -119,10 +129,10 @@ public class BackupRestoreIntentService extends IntentService {
         }
         File filesFolder = new File(getFilesDir().getAbsolutePath());
         File[] filesInData = filesFolder.listFiles();
-        if(filesInData.length > 0) {
-            for(File file : filesInData) {
+        if (filesInData.length > 0) {
+            for (File file : filesInData) {
                 String fileName = file.getName();
-                if(!fileName.equals("scripts") && !fileName.contains("rList")) {
+                if (!fileName.equals("scripts") && !fileName.contains("rList")) {
                     stringBuilder.append(fileName).append("\n");
                 }
             }
@@ -162,22 +172,22 @@ public class BackupRestoreIntentService extends IntentService {
         }
     }
 
-    public class UiThreadRunnable implements Runnable {
+    private class UiThreadRunnable implements Runnable {
         private String mMessage;
 
-        public UiThreadRunnable(String message) {
+        UiThreadRunnable(String message) {
             mMessage = message;
         }
 
         @Override
         public void run() {
-            Toast.makeText(Constants.CONTEXT, mMessage, Toast.LENGTH_SHORT).show();
+            Toast.makeText(MyApp.getContext(), mMessage, Toast.LENGTH_SHORT).show();
         }
     }
 
     private class LocalReceiver extends BroadcastReceiver {
-        public static final String BACKUP_COMPLETE_ACTION = "com.wubydax.action.BACKUP_COMPLETE";
-        public static final String RESTORE_COMPLETE_ACTION = "com.wubydax.action.RESTORE_COMPLETE";
+        static final String BACKUP_COMPLETE_ACTION = "com.wubydax.action.BACKUP_COMPLETE";
+        static final String RESTORE_COMPLETE_ACTION = "com.wubydax.action.RESTORE_COMPLETE";
 
         @Override
         public void onReceive(Context context, Intent intent) {

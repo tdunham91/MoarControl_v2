@@ -61,7 +61,7 @@ public class ThumbnailListPreference extends DialogPreference implements Adapter
         mIsSilent = typedArray.getBoolean(R.styleable.MyPreference_isSilent, true);
         int resId = typedArray.getResourceId(R.styleable.ThumbnailListPreference_drawableArray, 0);
         if (resId != 0) {
-            TypedArray resourceArray = mContext.getResources().obtainTypedArray(resId);
+            TypedArray resourceArray = context.getResources().obtainTypedArray(resId);
             mThumbnailsArray = new Drawable[resourceArray.length()];
             for (int i = 0; i < resourceArray.length(); i++) {
                 mThumbnailsArray[i] = resourceArray.getDrawable(i);
@@ -181,7 +181,7 @@ public class ThumbnailListPreference extends DialogPreference implements Adapter
         Drawable[] mThumbnails;
         int mSelectedPosition;
 
-        public ListAdapter(Context context, CharSequence[] entries, CharSequence[] values, Drawable[] thumbnails, int selectedPosition) {
+        ListAdapter(Context context, CharSequence[] entries, CharSequence[] values, Drawable[] thumbnails, int selectedPosition) {
             c = context;
             this.mEntries = entries;
             this.mValues = values;
@@ -233,7 +233,7 @@ public class ThumbnailListPreference extends DialogPreference implements Adapter
             TextView mTextView;
             ImageView mImageView;
 
-            public ViewHolder(View v) {
+            ViewHolder(View v) {
                 mRadioButton = (RadioButton) v.findViewById(R.id.thumbnailRadioButton);
                 mTextView = (TextView) v.findViewById(R.id.thumbnailText);
                 mImageView = (ImageView) v.findViewById(R.id.thumbnailImage);

@@ -19,6 +19,7 @@
     </declare-styleable>
     <declare-styleable name="RunScriptPreference">
         <attr name="scriptFileName" format="string"/>
+        <attr name="showConfirmDialog" format="boolean"/>
     </declare-styleable>
     <declare-styleable name="IntentDialogPreference">
         <attr name="intentSeparator" format="string"/>

@@ -42,4 +42,8 @@
     <string name="changelog">Changelog</string>
     <string name="about_us">About us</string>
     <string name="reset_to_defaults">Reset to defaults</string>
+    <string name="confirm_script_dialog_message">"Are you sure you want to run %1$s?"</string>
+    <string name="run_script_confirm_dialog_title">Confirmation required</string>
+    <string name="run_script_confirm_dialog_positive_button">Yes, run</string>
+    <string name="find_app">Find App</string>
 </resources>

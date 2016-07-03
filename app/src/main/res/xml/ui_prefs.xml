@@ -58,7 +58,8 @@
             android:key="test_intent"
             android:title="Select Test App"
             wubydax:intentSeparator="/"
-            wubydax:showSearch="true"/>
+            wubydax:showSearch="true"
+            android:defaultValue="com.android.settings/com.android.settings.Settings"/>
         <com.wubydax.romcontrol.prefs.UriSelectionPreference
             android:dependency="test_checkbox"
             android:key="test_image_selection_key_2"

@@ -19,8 +19,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.wubydax.romcontrol.MyApp;
 import com.wubydax.romcontrol.R;
 
 import java.io.File;
@@ -79,7 +79,7 @@ public class MyDialogFragment extends DialogFragment implements View.OnClickList
             case Constants.BACKUP_OR_RESTORE_DIALOG_REQUEST_CODE:
                 return getBackupRestoreChooserDialog();
             case Constants.RESTORE_FILE_SELECTOR_DIALOG_REQUEST_CODE:
-                if(!getArguments().getBoolean(Constants.DIALOG_RESTORE_IS_CONFIRM_REQUIRED)) {
+                if (!getArguments().getBoolean(Constants.DIALOG_RESTORE_IS_CONFIRM_REQUIRED)) {
                     return getRestoreFileSelectorDialog();
                 } else {
                     return getRestoreConfirmDialog(getArguments().getString(Constants.BACKUP_FILE_PATH_EXTRA_KEY));
@@ -99,7 +99,7 @@ public class MyDialogFragment extends DialogFragment implements View.OnClickList
                 .setPositiveButton("confirm", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        if(mOnDialogFragmentListener != null) {
+                        if (mOnDialogFragmentListener != null) {
                             mOnDialogFragmentListener.onRestoreRequested(filePath, true);
                         }
                     }
@@ -112,7 +112,7 @@ public class MyDialogFragment extends DialogFragment implements View.OnClickList
         final File[] backupFiles = backupFolder.listFiles();
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         boolean isBackup = backupFolder.exists() && backupFiles.length > 0;
-        if(isBackup) {
+        if (isBackup) {
             String[] items = new String[backupFiles.length];
             for (int i = 0; i < backupFiles.length; i++) {
                 items[i] = backupFiles[i].getName();
@@ -124,8 +124,8 @@ public class MyDialogFragment extends DialogFragment implements View.OnClickList
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
 
-                            if(mOnDialogFragmentListener != null) {
-                                int checked = ((AlertDialog)dialog).getListView().getCheckedItemPosition();
+                            if (mOnDialogFragmentListener != null) {
+                                int checked = ((AlertDialog) dialog).getListView().getCheckedItemPosition();
                                 mOnDialogFragmentListener.onRestoreRequested(backupFiles[checked].getAbsolutePath(), false);
                             }
                         }
@@ -137,7 +137,7 @@ public class MyDialogFragment extends DialogFragment implements View.OnClickList
                     .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            if(mOnDialogFragmentListener != null) {
+                            if (mOnDialogFragmentListener != null) {
                                 mOnDialogFragmentListener.onBackupRestoreResult(0);
                             }
                         }
@@ -159,8 +159,8 @@ public class MyDialogFragment extends DialogFragment implements View.OnClickList
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        int checked = ((AlertDialog)dialog).getListView().getCheckedItemPosition();
-                        if(mOnDialogFragmentListener != null) {
+                        int checked = ((AlertDialog) dialog).getListView().getCheckedItemPosition();
+                        if (mOnDialogFragmentListener != null) {
                             mOnDialogFragmentListener.onBackupRestoreResult(checked);
                         }
                     }
@@ -180,7 +180,7 @@ public class MyDialogFragment extends DialogFragment implements View.OnClickList
     }
 
     private Dialog getThemeChooserDialog() {
-        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(Constants.CONTEXT);
+        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(MyApp.getContext());
         final int previouslySelected = sharedPreferences.getInt(Constants.THEME_PREF_KEY, 0);
         return new AlertDialog.Builder(getActivity())
 
@@ -190,8 +190,8 @@ public class MyDialogFragment extends DialogFragment implements View.OnClickList
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        int checked = ((AlertDialog)dialog).getListView().getCheckedItemPosition();
-                        if(mOnDialogFragmentListener != null && previouslySelected != checked) {
+                        int checked = ((AlertDialog) dialog).getListView().getCheckedItemPosition();
+                        if (mOnDialogFragmentListener != null && previouslySelected != checked) {
                             sharedPreferences.edit().putInt(Constants.THEME_PREF_KEY, checked).apply();
                             mOnDialogFragmentListener.onDialogResult(mRequestCode);
                         }
@@ -202,7 +202,7 @@ public class MyDialogFragment extends DialogFragment implements View.OnClickList
 
 
     private Dialog getRebootMenuDialog() {
-        @SuppressLint("InflateParams") View view = LayoutInflater.from(new ContextThemeWrapper(Constants.CONTEXT, R.style.AppTheme)).inflate(R.layout.reboot_layout, null);
+        @SuppressLint("InflateParams") View view = LayoutInflater.from(new ContextThemeWrapper(MyApp.getContext(), R.style.AppTheme)).inflate(R.layout.reboot_layout, null);
         view.findViewById(R.id.rebootDevice).setOnClickListener(this);
         view.findViewById(R.id.rebootRecovery).setOnClickListener(this);
         view.findViewById(R.id.rebootUI).setOnClickListener(this);
@@ -229,7 +229,7 @@ public class MyDialogFragment extends DialogFragment implements View.OnClickList
     @Override
     public void onClick(View v) {
         int id = v.getId();
-        PowerManager powerManager = (PowerManager) Constants.CONTEXT.getSystemService(Context.POWER_SERVICE);
+        PowerManager powerManager = (PowerManager) MyApp.getContext().getSystemService(Context.POWER_SERVICE);
         switch (id) {
             case R.id.rebootDevice:
                 powerManager.reboot(null);
@@ -238,7 +238,7 @@ public class MyDialogFragment extends DialogFragment implements View.OnClickList
                 powerManager.reboot("recovery");
                 break;
             case R.id.rebootUI:
-
+                Utils.killPackage("com.android.systemui");
                 break;
 
         }
@@ -258,12 +258,21 @@ public class MyDialogFragment extends DialogFragment implements View.OnClickList
     }
 
 
+    public interface OnDialogFragmentListener {
+        void onDialogResult(int requestCode);
+
+        void onBackupRestoreResult(int which);
+
+        void onRestoreRequested(String filePath, boolean isConfirmed);
+
+        View getDecorView();
+    }
 
     private class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         private Context mContext;
         private String[] mChangelogItems;
 
-        public MyAdapter(Context context) {
+        MyAdapter(Context context) {
             mContext = context;
             mChangelogItems = mContext.getResources().getStringArray(R.array.changelog_items);
         }
@@ -284,20 +293,13 @@ public class MyDialogFragment extends DialogFragment implements View.OnClickList
             return mChangelogItems != null ? mChangelogItems.length : 0;
         }
 
-        public class MyViewHolder extends RecyclerView.ViewHolder {
+        class MyViewHolder extends RecyclerView.ViewHolder {
             TextView mTextView;
 
-            public MyViewHolder(View itemView) {
+            MyViewHolder(View itemView) {
                 super(itemView);
                 mTextView = (TextView) itemView.findViewById(R.id.changelogText);
             }
         }
-    }
-
-    public interface OnDialogFragmentListener {
-        void onDialogResult(int requestCode);
-        void onBackupRestoreResult(int which);
-        void onRestoreRequested(String filePath, boolean isConfirmed);
-        View getDecorView();
     }
 }

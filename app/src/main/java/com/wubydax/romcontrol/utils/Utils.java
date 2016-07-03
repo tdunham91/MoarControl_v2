@@ -18,7 +18,7 @@ import android.widget.Toast;
 import com.stericson.RootShell.exceptions.RootDeniedException;
 import com.stericson.RootShell.execution.Command;
 import com.stericson.RootTools.RootTools;
-import com.wubydax.romcontrol.MyApplication;
+import com.wubydax.romcontrol.MyApp;
 import com.wubydax.romcontrol.R;
 
 import java.io.File;
@@ -51,11 +51,11 @@ public class Utils {
 
     private static final String LOG_TAG = "RomControlUtils";
 
-    public static void copyAssetFolder() {
+    static void copyAssetFolder() {
 
 
         try {
-            String[] scriptsInAssets = Constants.CONTEXT.getAssets().list(Constants.SCRIPTS_FOLDER);
+            String[] scriptsInAssets = MyApp.getContext().getAssets().list(Constants.SCRIPTS_FOLDER);
             Log.d(LOG_TAG, "copyAssetFolder " + scriptsInAssets[0]);
             File scriptsFilesDir = new File(Constants.FILES_SCRIPTS_FOLDER_PATH);
             //Checking if the "scripts" directory exists in files
@@ -79,7 +79,7 @@ public class Utils {
         }
     }
 
-    public static void copyAsset(String[] scriptsInAssets, String from, String to) {
+    private static void copyAsset(String[] scriptsInAssets, String from, String to) {
         boolean isCopied = false;
         InputStream in;
         OutputStream out;
@@ -93,7 +93,7 @@ public class Utils {
             //If the file doesn't exist in files dir, we copy it
             if (!scriptsFiles.get(j).exists()) {
                 try {
-                    in = Constants.CONTEXT.getAssets().open(from);
+                    in = MyApp.getContext().getAssets().open(from);
                     new File(to).createNewFile();
                     out = new FileOutputStream(to);
                     copyFile(in, out);
@@ -122,7 +122,7 @@ public class Utils {
     }
 
     //Actual copying of the file
-    public static void copyFile(InputStream in, OutputStream out) throws IOException {
+    private static void copyFile(InputStream in, OutputStream out) throws IOException {
         byte[] buffer = new byte[1024];
         int read;
         while ((read = in.read(buffer)) != -1) {
@@ -134,10 +134,11 @@ public class Utils {
         Drawable drawable = null;
         if (uri != null) {
             try {
-                InputStream inputStream = Constants.CONTEXT.getContentResolver().openInputStream(uri);
+                InputStream inputStream = MyApp.getContext().getContentResolver().openInputStream(uri);
                 Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
                 Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth()/5, bitmap.getHeight()/5, false);
-                drawable = new BitmapDrawable(Constants.CONTEXT.getResources(), scaledBitmap);
+                drawable = new BitmapDrawable(MyApp.getContext().getResources(), scaledBitmap);
+                bitmap.recycle();
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
@@ -145,12 +146,12 @@ public class Utils {
         return drawable;
     }
 
-    public static Drawable getDrawable(View rootView) {
+    static Drawable getDrawable(View rootView) {
         rootView.setDrawingCacheEnabled(true);
         Bitmap bitmap = Bitmap.createBitmap(rootView.getDrawingCache());
         rootView.setDrawingCacheEnabled(false);
         Bitmap blurredBitmap = getBlurredImage(bitmap, 0.3f, 50);
-        return new BitmapDrawable(MyApplication.getContext().getResources(), blurredBitmap);
+        return new BitmapDrawable(MyApp.getContext().getResources(), blurredBitmap);
     }
 
     private static float getDegreesForRotation(int rotation) {
@@ -373,12 +374,12 @@ public class Utils {
 
     public static void showKillPackageDialog(final String packageName, Context context) {
         try {
-            ApplicationInfo applicationInfo = Constants.CONTEXT.getPackageManager().getApplicationInfo(packageName, 0);
-            String appLabel = applicationInfo.loadLabel(Constants.CONTEXT.getPackageManager()).toString();
-            Drawable appIcon = applicationInfo.loadIcon(Constants.CONTEXT.getPackageManager());
+            ApplicationInfo applicationInfo = MyApp.getContext().getPackageManager().getApplicationInfo(packageName, 0);
+            String appLabel = applicationInfo.loadLabel(MyApp.getContext().getPackageManager()).toString();
+            Drawable appIcon = applicationInfo.loadIcon(MyApp.getContext().getPackageManager());
             new AlertDialog.Builder(context)
                     .setTitle(R.string.app_reboot_required_dialog_title)
-                    .setMessage(String.format(Locale.getDefault(), Constants.CONTEXT.getString(R.string.app_reboot_required_dialog_message), appLabel))
+                    .setMessage(String.format(Locale.getDefault(), MyApp.getContext().getString(R.string.app_reboot_required_dialog_message), appLabel))
                     .setIcon(appIcon)
                     .setNegativeButton(android.R.string.cancel, null)
                     .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
@@ -389,13 +390,18 @@ public class Utils {
                     })
                     .create().show();
         } catch (PackageManager.NameNotFoundException e) {
-            Toast.makeText(Constants.CONTEXT, "App not installed", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MyApp.getContext(), "App not installed", Toast.LENGTH_SHORT).show();
         }
 
     }
 
 
     public static void killPackage(String packageNameToKill) {
-
+        Command command = new Command(0, "pkill " + packageNameToKill);
+        try {
+            RootTools.getShell(true).add(command);
+        } catch (IOException | TimeoutException | RootDeniedException e) {
+            e.printStackTrace();
+        }
     }
 }

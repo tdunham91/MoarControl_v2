@@ -56,20 +56,35 @@
         <item>@drawable/icon_1</item>
         <item>@drawable/icon_3</item>
     </array>
+
+
+
+
     <string-array name="about_contact_us_text">
         <item>Facebook</item>
         <item>Our Site</item>
         <item>XDA</item>
+    </string-array>
+    <string-array name="about_contact_us_links">
+        <item>https://www.facebook.com/</item>
+        <item>https://www.google.com/</item>
+        <item>http://forum.xda-developers.com/</item>
     </string-array>
     <array name="about_team_drawables">
         <item>@drawable/icon_5</item>
         <item>@drawable/icon_6</item>
         <item>@drawable/icon_1</item>
     </array>
+
     <string-array name="about_team_names">
         <item>Master Yoda - wise and talented lead developer</item>
         <item>Luke Skywalker - one handed theme master</item>
         <item>Darth Vader - dark theme master</item>
+    </string-array>
+    <string-array name="about_team_links">
+        <item>https://www.facebook.com/</item>
+        <item>https://www.google.com/</item>
+        <item>http://forum.xda-developers.com/</item>
     </string-array>
     <array name="about_credits_drawables">
         <item>@drawable/icon_1</item>
@@ -79,6 +94,7 @@
         <item>@drawable/icon_6</item>
         <item>@drawable/icon_5</item>
     </array>
+
     <string-array name="about_credits_names">
         <item>Star Trek - for being ultimately better than Star Wars</item>
         <item>Jean-Luc Picard - for making us crave hot earl-grey tea even in the middle of the summer</item>
@@ -87,7 +103,14 @@
         <item>Q - for reminding us that you can live forever and still look great</item>
         <item>Worf - for teaching us to love Klingons. It was NOT easy</item>
     </string-array>
-
+    <string-array name="about_credits_links">
+        <item>https://www.facebook.com/</item>
+        <item>https://www.google.com/</item>
+        <item>http://forum.xda-developers.com/</item>
+        <item>https://www.facebook.com/</item>
+        <item>https://www.google.com/</item>
+        <item>http://forum.xda-developers.com/</item>
+    </string-array>
     <string-array name="custom_bg_type_entries">
         <item>Image</item>
         <item>Solid color</item>

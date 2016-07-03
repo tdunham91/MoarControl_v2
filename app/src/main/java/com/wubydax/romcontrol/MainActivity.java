@@ -3,6 +3,7 @@ package com.wubydax.romcontrol;
 import android.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
@@ -26,16 +27,22 @@ public class MainActivity extends AppCompatActivity
         MyDialogFragment.OnDialogFragmentListener {
     private ProgressDialog mProgressDialog;
     private FragmentManager mFragmentManager;
+    private SharedPreferences mSharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTheme(PreferenceManager.getDefaultSharedPreferences(Constants.CONTEXT).getInt(Constants.THEME_PREF_KEY, 0) == 0 ? R.style.AppTheme_NoActionBar : R.style.AppTheme_NoActionBar_Dark);
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        setTheme(mSharedPreferences.getInt(Constants.THEME_PREF_KEY, 0) == 0 ? R.style.AppTheme_NoActionBar : R.style.AppTheme_NoActionBar_Dark);
         setContentView(R.layout.activity_main);
         mFragmentManager = getFragmentManager();
         initViews();
+        String lastTitle = mSharedPreferences.getString(Constants.LAST_TITLE, "SystemUI prefs");
         if (savedInstanceState == null) {
-            loadPrefsFragment(PreferenceManager.getDefaultSharedPreferences(this).getString(Constants.CURRENT_FRAGMENT, "ui_prefs"));
+            String lastFragment = mSharedPreferences.getString(Constants.LAST_FRAGMENT, "ui_prefs");
+            loadPrefsFragment(lastFragment, lastTitle);
+        } else {
+            setTitle(lastTitle);
         }
         SuTask suTask = new SuTask();
         suTask.setOnSuCompletedListener(this);
@@ -92,18 +99,17 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
         int id = item.getItemId();
+        String title = item.getTitle().toString();
         switch (id) {
 
             case R.id.sys_ui_prefs:
-                loadPrefsFragment("ui_prefs");
+                loadPrefsFragment("ui_prefs", title);
                 break;
             case R.id.phone_prefs:
-                loadPrefsFragment("phone_prefs");
+                loadPrefsFragment("phone_prefs", title);
                 break;
             case R.id.themes:
                 mFragmentManager.beginTransaction().add(MyDialogFragment.newInstance(Constants.THEME_DIALOG_REQUEST_CODE), "theme_dialog").commit();
@@ -148,8 +154,10 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void loadPrefsFragment(String prefName) {
+    private void loadPrefsFragment(String prefName, String title) {
         mFragmentManager.beginTransaction().replace(R.id.fragment_container, PrefsFragment.newInstance(prefName)).commit();
+        setTitle(title);
+        mSharedPreferences.edit().putString(Constants.LAST_TITLE, title).apply();
     }
 
 
@@ -188,6 +196,13 @@ public class MainActivity extends AppCompatActivity
                 break;
         }
     }
+
+    @Override
+    protected void onPause() {
+        Runtime.getRuntime().gc();
+        super.onPause();
+    }
+
 
     @Override
     public void onRestoreRequested(String filePath, boolean isConfirmed) {

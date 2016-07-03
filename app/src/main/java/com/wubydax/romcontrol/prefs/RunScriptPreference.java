@@ -1,6 +1,8 @@
 package com.wubydax.romcontrol.prefs;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.res.TypedArray;
 import android.preference.Preference;
 import android.util.AttributeSet;
@@ -14,6 +16,7 @@ import com.wubydax.romcontrol.utils.Constants;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Locale;
 import java.util.concurrent.TimeoutException;
 
 /*      Created by Roberto Mariani and Anna Berkovitch, 12/06/2016
@@ -32,18 +35,39 @@ import java.util.concurrent.TimeoutException;
 
 public class RunScriptPreference extends Preference {
     private String mFilePath;
+    private boolean mIsConfirmRequired;
 
     public RunScriptPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
         TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.RunScriptPreference);
         String scriptName = typedArray.getString(R.styleable.RunScriptPreference_scriptFileName);
         mFilePath = Constants.FILES_SCRIPTS_FOLDER_PATH + File.separator + scriptName;
+        mIsConfirmRequired = typedArray.getBoolean(R.styleable.RunScriptPreference_showConfirmDialog, true);
         typedArray.recycle();
     }
 
     @Override
     protected void onClick() {
         super.onClick();
+        if(mIsConfirmRequired) {
+            new AlertDialog.Builder(getContext())
+                    .setTitle(R.string.run_script_confirm_dialog_title)
+                    .setMessage(String.format(Locale.getDefault(), getContext().getString(R.string.confirm_script_dialog_message), getTitle()))
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .setPositiveButton(R.string.run_script_confirm_dialog_positive_button, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            runScript();
+                        }
+                    }).create()
+                    .show();
+        } else {
+            runScript();
+        }
+
+    }
+
+    private void runScript() {
         Command command = new Command(0, mFilePath) {
             @Override
             public void commandCompleted(int id, int exitCode) {
